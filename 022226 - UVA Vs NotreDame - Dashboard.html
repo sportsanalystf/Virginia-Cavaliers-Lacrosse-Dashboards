@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UVA vs Notre Dame — Post-Game Analytics | Feb 22, 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root { --uva-blue:#232D4B; --uva-orange:#E57200; --nd-blue:#0C2340; --nd-gold:#C99700; --bg1:#0d1117; --bg2:#161b22; --border:#30363d; --t1:#e6edf3; --t2:#8b949e; --t3:#484f58; --green:#4CAF50; --red:#f44336; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg1));color:var(--t1);min-height:100vh}
+  .header{background:linear-gradient(135deg,var(--uva-blue),#1a2744);padding:24px 28px;border-bottom:3px solid var(--uva-orange)}
+  .header-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+  .header h1{font-size:24px;font-weight:800;letter-spacing:-0.5px}
+  .header .uva{color:var(--uva-orange)} .header .nd{color:var(--nd-gold)} .header .vs{color:var(--t2);font-size:16px}
+  .subtitle{color:var(--t2);font-size:13px;margin-top:4px}
+  .win-badge{background:rgba(76,175,80,0.15);border:1px solid rgba(76,175,80,0.3);color:var(--green);padding:4px 12px;border-radius:6px;font-weight:700;font-size:12px}
+  .scores{display:flex;gap:12px;align-items:center}
+  .score-box{text-align:center;padding:6px 18px;border-radius:8px}
+  .score-box.uva{background:rgba(229,114,0,0.15);border:1px solid rgba(229,114,0,0.25)}
+  .score-box.nd{background:rgba(201,151,0,0.15);border:1px solid rgba(201,151,0,0.25)}
+  .score-num{font-size:28px;font-weight:800}
+  .score-box.uva .score-num{color:var(--uva-orange)} .score-box.nd .score-num{color:var(--nd-gold)}
+  .score-label{font-size:10px;color:var(--t2);letter-spacing:1px}
+  .tabs{display:flex;gap:4px;padding:10px 28px;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap;overflow-x:auto}
+  .tab-btn{padding:7px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--t2);cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap;transition:all .2s}
+  .tab-btn:hover{border-color:var(--uva-orange);color:var(--uva-orange)}
+  .tab-btn.active{border-color:var(--uva-orange);background:rgba(229,114,0,0.12);color:var(--uva-orange)}
+  .content{padding:20px 28px;max-width:1200px;margin:0 auto}
+  .panel{display:none}.panel.active{display:block}
+  h2{font-size:18px;font-weight:700;margin-bottom:4px}
+  .desc{color:var(--t2);font-size:12px;margin-bottom:16px}
+  .chart-box{background:var(--bg2);border-radius:12px;padding:20px;border:1px solid var(--border)}
+  .chart-box canvas{max-height:400px}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:16px}
+  .stat-card{background:var(--bg2);border-radius:10px;padding:14px;border:1px solid var(--border)}
+  .stat-label{font-size:10px;color:var(--t2);letter-spacing:.5px}
+  .stat-value{font-size:22px;font-weight:800;margin-top:3px}
+  .stat-sub{font-size:10px;color:var(--t3);margin-top:2px}
+  .play-list{display:grid;gap:6px;margin-top:16px}
+  .play-item{background:var(--bg2);border-radius:8px;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;font-size:13px}
+  .team-tag{font-weight:700;margin-right:6px}.team-tag.uva{color:var(--uva-orange)}.team-tag.nd{color:var(--nd-gold)}
+  .wpa-val{font-weight:800;font-size:15px;min-width:65px;text-align:right}.wpa-val.pos{color:var(--green)}.wpa-val.neg{color:var(--red)}
+  .pt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:16px}
+  .pt-card{background:var(--bg2);border-radius:8px;padding:10px;border:1px solid var(--border)}
+  .pt-name{font-size:12px;font-weight:600}.pt-val{font-size:20px;font-weight:800;margin-top:3px}
+  .pt-val.pos{color:var(--green)}.pt-val.neg{color:var(--red)}
+  .pt-meta{font-size:10px;color:var(--t2);margin-top:2px}
+  .p-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-top:16px}
+  .p-card{background:var(--bg2);border-radius:10px;padding:14px}
+  .p-card.uva{border:1px solid rgba(229,114,0,0.25)}.p-card.nd{border:1px solid rgba(201,151,0,0.25)}
+  .p-top{display:flex;justify-content:space-between;align-items:center}
+  .pname{font-size:14px;font-weight:700}.pname.uva{color:var(--uva-orange)}.pname.nd{color:var(--nd-gold)}
+  .pwpa{font-size:18px;font-weight:800}.pwpa.pos{color:var(--green)}.pwpa.neg{color:var(--red)}
+  .p-stats{font-size:11px;color:var(--t2);margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:3px}
+  .bar-bg{margin-top:6px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:2px}
+  .bar-fill.uva{background:linear-gradient(90deg,var(--uva-orange),var(--green))}
+  .bar-fill.nd{background:linear-gradient(90deg,var(--nd-gold),var(--nd-blue))}
+  .moment{background:var(--bg2);border-radius:12px;padding:18px;margin-bottom:12px;border-left:4px solid}
+  .moment .top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px}
+  .moment h3{font-size:15px;font-weight:700}.moment .mwpa{font-size:16px;font-weight:800;white-space:nowrap}
+  .moment p{color:var(--t2);font-size:12px;margin-top:8px;line-height:1.6}
+  .bottom-line{margin-top:24px;background:var(--bg2);border-radius:12px;padding:18px;border:1px solid rgba(229,114,0,0.2)}
+  .bottom-line h3{font-size:15px;font-weight:700;color:var(--uva-orange);margin-bottom:10px}
+  .bottom-line p{color:var(--t2);font-size:12px;line-height:1.7}
+  .section-title{font-size:15px;font-weight:600;margin-top:20px;margin-bottom:10px}
+  .footer{text-align:center;padding:16px 0;color:var(--border);font-size:10px}
+  @media(max-width:640px){.header h1{font-size:18px}.content{padding:14px}.stat-grid{grid-template-columns:1fr 1fr}.p-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <h1><span class="uva">VIRGINIA</span> <span class="vs">at</span> <span class="nd">NOTRE DAME</span></h1>
+      <div class="subtitle">Post-Game Analytics | Feb 22, 2026 | South Bend, IN | <span class="win-badge">W — ACC OPENER</span></div>
+    </div>
+    <div class="scores">
+      <div class="score-box uva"><div class="score-num">9</div><div class="score-label">UVA</div></div>
+      <div style="font-size:16px;color:var(--t3);font-weight:700">—</div>
+      <div class="score-box nd"><div class="score-num">7</div><div class="score-label">ND</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="tabs" id="tabBar"></div>
+
+<div class="content">
+  <div class="panel active" id="p-0">
+    <h2>Win Probability — UVA Perspective</h2>
+    <p class="desc">Logistic model: score differential + time remaining + momentum. 50% = toss-up. This game was a rollercoaster.</p>
+    <div class="chart-box"><canvas id="wpChart"></canvas></div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-label">Peak UVA Win%</div><div class="stat-value" style="color:var(--uva-orange)" id="peakWP"></div><div class="stat-sub">After 6-4 lead (Q2 end)</div></div>
+      <div class="stat-card"><div class="stat-label">Lowest UVA Win%</div><div class="stat-value" style="color:var(--red)" id="lowWP"></div><div class="stat-sub">Down 1-3 in Q1</div></div>
+      <div class="stat-card"><div class="stat-label">Biggest Single Swing</div><div class="stat-value" style="color:var(--green)">+12.1%</div><div class="stat-sub">Q4 Dinardo MU goal (8-7)</div></div>
+      <div class="stat-card"><div class="stat-label">Times Below 50%</div><div class="stat-value" style="color:var(--nd-gold)">~25 min</div><div class="stat-sub">Q1 and Q3 entirely</div></div>
+    </div>
+  </div>
+
+  <div class="panel" id="p-1">
+    <h2>Win Probability Added — Every Play</h2>
+    <p class="desc">Each bar = one play. Green = helped UVA. Red = hurt UVA. Hover for details.</p>
+    <div class="chart-box"><canvas id="wpaChart"></canvas></div>
+    <div class="section-title">Highest Impact Plays</div>
+    <div class="play-list" id="topPlays"></div>
+  </div>
+
+  <div class="panel" id="p-2">
+    <h2>Impact by Play Type</h2>
+    <p class="desc">Net WPA by play category from UVA's perspective across the entire game.</p>
+    <div class="chart-box"><canvas id="ptChart"></canvas></div>
+    <div class="pt-grid" id="ptCards"></div>
+  </div>
+
+  <div class="panel" id="p-3">
+    <h2>Virginia — Player Influence</h2>
+    <p class="desc">Total WPA = cumulative impact on UVA's win probability this game.</p>
+    <div class="chart-box"><canvas id="uvaChart"></canvas></div>
+    <div class="section-title">Player Cards</div>
+    <div class="p-grid" id="uvaCards"></div>
+  </div>
+
+  <div class="panel" id="p-4">
+    <h2>Notre Dame — Player Influence</h2>
+    <p class="desc">From UVA's perspective: negative WPA = hurt Virginia (good for ND).</p>
+    <div class="chart-box"><canvas id="ndChart"></canvas></div>
+    <div class="section-title">Notre Dame's Key Contributors</div>
+    <div class="p-grid" id="ndCards"></div>
+  </div>
+
+  <div class="panel" id="p-5">
+    <h2>Key Moments &amp; Turning Points</h2>
+    <p class="desc">The moments that defined this game — a tale of two halves, and a gutsy fourth quarter.</p>
+    <div id="moments"></div>
+    <div class="bottom-line">
+      <h3>Bottom Line for the Staff</h3>
+      <p>This was a character win. Virginia fell behind 1-3 in Q1 on two free position goals, then flipped the script with a dominant Q2 (5-1) driven by ball movement and settled offense. The Q3 shutout was brutal — Notre Dame's 3-0 run tied it and took the lead — but Q4 showed growth: Galica's FP goal, Dinardo's man-up finish, and Alaimo's insurance goal were all composed, high-IQ plays. The difference from the Maryland game? Discipline improved (only 1 man-up goal allowed vs 3), and the offense showed it can respond to adversity. Galica was the best player on the field (3G-2A-8DC). The Q3 turnover problem (6 TOs, 0 goals) has to be addressed — that quarter nearly cost us the game. But the defense shutting out Notre Dame in Q4 (0 goals, 3 shots) was the defining stretch. This team is growing.</p>
+    </div>
+  </div>
+</div>
+
+<div class="footer">Virginia Athletics — Women's Lacrosse Analytics | Post-Game Report</div>
+
+<script>
+const O="#E57200",G="#C99700",GR="#4CAF50",RD="#f44336";
+
+function wp(u,n,tMin,mom=0){
+  const d=u-n,f=tMin/60,eg=f*11,sd=0.82;
+  const z=d/(sd*Math.sqrt(Math.max(eg,0.4)))+mom*0.06;
+  return Math.max(0.01,Math.min(0.99,1/(1+Math.exp(-1.9*z))));
+}
+
+// Full play-by-play with all state-changing events from the PDF
+const plays=[
+  {id:0,q:1,time:"15:00",tM:60,team:"--",type:"Game Start",player:"--",detail:"Opening Draw",u:0,n:0},
+  {id:1,q:1,time:"15:00",tM:60,team:"ND",type:"Draw Control",player:"Meghan O'Hare",detail:"Draw won",u:0,n:0},
+  {id:2,q:1,time:"15:00",tM:60,team:"ND",type:"Turnover",player:"M. Conley",detail:"Unforced",u:0,n:0},
+  {id:3,q:1,time:"13:31",tM:58.52,team:"UVA",type:"Clear Failed",player:"Team",detail:"Failed clear",u:0,n:0},
+  {id:4,q:1,time:"13:31",tM:58.52,team:"UVA",type:"Turnover",player:"Kate Galica",detail:"CT: Lila O'Brien",u:0,n:0},
+  {id:5,q:1,time:"12:29",tM:57.48,team:"ND",type:"Shot Saved",player:"M. Conley",detail:"Save: Finnelle",u:0,n:0},
+  {id:6,q:1,time:"11:04",tM:56.07,team:"UVA",type:"Goal",player:"Raleigh Foster",detail:"Ast: Kate Galica",u:1,n:0},
+  {id:7,q:1,time:"11:04",tM:56.07,team:"ND",type:"Draw Control",player:"Uma Kowalski",detail:"Draw won",u:1,n:0},
+  {id:8,q:1,time:"10:31",tM:55.52,team:"UVA",type:"Turnover",player:"Jenna Dinardo",detail:"Unforced",u:1,n:0},
+  {id:9,q:1,time:"09:15",tM:54.25,team:"ND",type:"Goal",player:"Madison Rassas",detail:"Ast: Maura Irish",u:1,n:1},
+  {id:10,q:1,time:"09:15",tM:54.25,team:"UVA",type:"Draw Control",player:"Kate Galica",detail:"Draw won",u:1,n:1},
+  {id:11,q:1,time:"09:15",tM:54.25,team:"UVA",type:"Turnover",player:"Megan Rocklein",detail:"CT: Lila O'Brien",u:1,n:1},
+  {id:12,q:1,time:"08:37",tM:53.62,team:"ND",type:"Clear Failed",player:"Team",detail:"Failed clear",u:1,n:1},
+  {id:13,q:1,time:"07:03",tM:52.05,team:"UVA",type:"Shot Blocked",player:"A. Adams",detail:"Shot blocked",u:1,n:1},
+  {id:14,q:1,time:"07:03",tM:52.05,team:"UVA",type:"Turnover",player:"Megan Rocklein",detail:"CT: Ceci Patterson",u:1,n:1},
+  {id:15,q:1,time:"05:53",tM:50.88,team:"ND",type:"Goal (FP)",player:"Emma Murphy",detail:"Free position goal",u:1,n:2},
+  {id:16,q:1,time:"05:53",tM:50.88,team:"UVA",type:"Draw Control",player:"Kate Galica",detail:"Draw won",u:1,n:2},
+  {id:17,q:1,time:"05:53",tM:50.88,team:"UVA",type:"Turnover",player:"Alex Reilly",detail:"Unforced",u:1,n:2},
+  {id:18,q:1,time:"04:03",tM:49.05,team:"ND",type:"Goal (FP)",player:"Grace Maroney",detail:"Free position goal",u:1,n:3},
+  {id:19,q:1,time:"04:03",tM:49.05,team:"UVA",type:"Timeout",player:"Team",detail:"Virginia timeout",u:1,n:3},
+  {id:20,q:1,time:"04:03",tM:49.05,team:"UVA",type:"Draw Control",player:"Kate Galica",detail:"Draw won",u:1,n:3},
+  {id:21,q:1,time:"04:03",tM:49.05,team:"UVA",type:"Turnover",player:"Jenna Dinardo",detail:"CT: Sloane Ginevan",u:1,n:3},
+  {id:22,q:1,time:"01:32",tM:46.53,team:"UVA",type:"Shot Saved",player:"Jenna Dinardo",detail:"Save: Patterson",u:1,n:3},
+  {id:23,q:1,time:"00:39",tM:45.65,team:"ND",type:"Turnover",player:"C. Bacigalupo",detail:"Unforced on FP",u:1,n:3},
+  // Q2
+  {id:24,q:2,time:"14:56",tM:44.93,team:"ND",type:"Penalty",player:"Madison Rassas",detail:"Green Card",u:1,n:3},
+  {id:25,q:2,time:"14:25",tM:44.42,team:"UVA",type:"Goal (Man-Up)",player:"Madison Alaimo",detail:"Man-up goal!",u:2,n:3},
+  {id:26,q:2,time:"13:41",tM:43.68,team:"UVA",type:"Shot Saved",player:"Jenna Dinardo",detail:"Save: Patterson",u:2,n:3},
+  {id:27,q:2,time:"13:00",tM:43.0,team:"UVA",type:"Shot High",player:"Kate Galica",detail:"Shot high",u:2,n:3},
+  {id:28,q:2,time:"12:38",tM:42.63,team:"UVA",type:"Shot Saved",player:"Addi Foster",detail:"Save: Patterson",u:2,n:3},
+  {id:29,q:2,time:"11:31",tM:41.52,team:"ND",type:"Shot Saved (FP)",player:"Kate Timarky",detail:"Save: Finnelle",u:2,n:3},
+  {id:30,q:2,time:"10:43",tM:40.72,team:"UVA",type:"Shot Saved",player:"Kate Galica",detail:"Save: Patterson",u:2,n:3},
+  {id:31,q:2,time:"10:38",tM:40.63,team:"ND",type:"Turnover",player:"Katie Mallaber",detail:"CT: Cady Flaherty",u:2,n:3},
+  {id:32,q:2,time:"08:48",tM:38.8,team:"UVA",type:"Goal",player:"Raleigh Foster",detail:"Ast: Madison Alaimo",u:3,n:3},
+  {id:33,q:2,time:"08:48",tM:38.8,team:"ND",type:"Draw Control",player:"Meghan O'Hare",detail:"Draw won",u:3,n:3},
+  {id:34,q:2,time:"08:24",tM:38.4,team:"ND",type:"Goal",player:"Abigail Lyons",detail:"Ast: Emma Murphy",u:3,n:4},
+  {id:35,q:2,time:"08:24",tM:38.4,team:"ND",type:"Draw Control",player:"Hadley Laughlin",detail:"Draw won",u:3,n:4},
+  {id:36,q:2,time:"08:24",tM:38.4,team:"ND",type:"Turnover",player:"H. Laughlin",detail:"CT: Sophia Conti",u:3,n:4},
+  {id:37,q:2,time:"07:20",tM:37.33,team:"UVA",type:"Shot Saved",player:"Jenna Dinardo",detail:"Save: Patterson",u:3,n:4},
+  {id:38,q:2,time:"06:08",tM:36.13,team:"ND",type:"Shot Saved (FP)",player:"Angie Conley",detail:"Save: Finnelle",u:3,n:4},
+  {id:39,q:2,time:"06:01",tM:36.02,team:"UVA",type:"Turnover",player:"Kate Galica",detail:"Unforced",u:3,n:4},
+  {id:40,q:2,time:"05:09",tM:35.15,team:"ND",type:"Turnover",player:"Grace Maroney",detail:"Unforced",u:3,n:4},
+  {id:41,q:2,time:"03:56",tM:33.93,team:"UVA",type:"Goal",player:"Kate Galica",detail:"Unassisted",u:4,n:4},
+  {id:42,q:2,time:"03:56",tM:33.93,team:"UVA",type:"Draw Control",player:"Corey White",detail:"Draw won",u:4,n:4},
+  {id:43,q:2,time:"03:51",tM:33.85,team:"UVA",type:"Shot Saved",player:"Addi Foster",detail:"Save: Patterson",u:4,n:4},
+  {id:44,q:2,time:"02:59",tM:32.98,team:"UVA",type:"Goal",player:"Addi Foster",detail:"Ast: Madison Alaimo",u:5,n:4},
+  {id:45,q:2,time:"02:59",tM:32.98,team:"ND",type:"Draw Control",player:"Uma Kowalski",detail:"Draw won",u:5,n:4},
+  {id:46,q:2,time:"02:45",tM:32.75,team:"UVA",type:"Penalty",player:"Kate Demark",detail:"Green Card",u:5,n:4},
+  {id:47,q:2,time:"02:45",tM:32.75,team:"ND",type:"Turnover",player:"Madison Rassas",detail:"CT: Kate Demark",u:5,n:4},
+  {id:48,q:2,time:"00:43",tM:30.72,team:"UVA",type:"Goal",player:"Kate Galica",detail:"Ast: Raleigh Foster",u:6,n:4},
+  {id:49,q:2,time:"00:43",tM:30.72,team:"ND",type:"Draw Control",player:"Uma Kowalski",detail:"Draw won",u:6,n:4},
+  {id:50,q:2,time:"00:30",tM:30.5,team:"UVA",type:"Penalty",player:"Lara Kology",detail:"Green Card",u:6,n:4},
+  {id:51,q:2,time:"00:06",tM:30.1,team:"ND",type:"Penalty",player:"Madison Rassas",detail:"Yellow Card",u:6,n:4},
+  // Q3
+  {id:52,q:3,time:"15:00",tM:30.0,team:"UVA",type:"Draw Control",player:"Kate Galica",detail:"Draw won",u:6,n:4},
+  {id:53,q:3,time:"14:09",tM:29.15,team:"UVA",type:"Shot Saved (FP)",player:"Madison Alaimo",detail:"Save: Patterson",u:6,n:4},
+  {id:54,q:3,time:"14:09",tM:29.15,team:"UVA",type:"Turnover",player:"Madison Alaimo",detail:"CT: Julia Carr",u:6,n:4},
+  {id:55,q:3,time:"12:25",tM:27.42,team:"ND",type:"Shot Wide (FP)",player:"M. Conley",detail:"FP shot wide",u:6,n:4},
+  {id:56,q:3,time:"11:50",tM:26.83,team:"ND",type:"Shot Saved",player:"Maura Irish",detail:"Save: Finnelle",u:6,n:4},
+  {id:57,q:3,time:"10:53",tM:25.88,team:"UVA",type:"Shot High",player:"Addi Foster",detail:"Shot high",u:6,n:4},
+  {id:58,q:3,time:"10:37",tM:25.62,team:"UVA",type:"Penalty",player:"G. Laverghetta",detail:"Yellow Card",u:6,n:4},
+  {id:59,q:3,time:"10:09",tM:25.15,team:"UVA",type:"Turnover",player:"Sophia Conti",detail:"CT: Franny O'Brien",u:6,n:4},
+  {id:60,q:3,time:"09:07",tM:24.12,team:"UVA",type:"Turnover",player:"Jenna Dinardo",detail:"CT: Ceci Patterson",u:6,n:4},
+  {id:61,q:3,time:"07:21",tM:22.35,team:"ND",type:"Goal",player:"Grace Maroney",detail:"Ast: Wynter Jock",u:6,n:5},
+  {id:62,q:3,time:"07:21",tM:22.35,team:"UVA",type:"Draw Control",player:"Kate Galica",detail:"Draw won",u:6,n:5},
+  {id:63,q:3,time:"07:06",tM:22.1,team:"ND",type:"Penalty",player:"Hadley Laughlin",detail:"Green Card",u:6,n:5},
+  {id:64,q:3,time:"07:06",tM:22.1,team:"UVA",type:"Turnover",player:"Madison Alaimo",detail:"CT: Meghan O'Hare",u:6,n:5},
+  {id:65,q:3,time:"05:39",tM:20.65,team:"ND",type:"Goal",player:"Katie Mallaber",detail:"Ast: Grace Maroney",u:6,n:6},
+  {id:66,q:3,time:"05:39",tM:20.65,team:"UVA",type:"Draw Control",player:"Kate Galica",detail:"Draw won",u:6,n:6},
+  {id:67,q:3,time:"05:39",tM:20.65,team:"UVA",type:"Turnover",player:"Jenna Dinardo",detail:"CT: Abigail Lyons",u:6,n:6},
+  {id:68,q:3,time:"03:40",tM:18.67,team:"ND",type:"Goal (FP)",player:"Katie Mallaber",detail:"Free position goal",u:6,n:7},
+  {id:69,q:3,time:"03:40",tM:18.67,team:"UVA",type:"Timeout",player:"Team",detail:"Virginia timeout",u:6,n:7},
+  {id:70,q:3,time:"03:40",tM:18.67,team:"ND",type:"Draw Control",player:"Meghan O'Hare",detail:"Draw won",u:6,n:7},
+  {id:71,q:3,time:"03:40",tM:18.67,team:"ND",type:"Turnover",player:"Madison Rassas",detail:"Unforced",u:6,n:7},
+  {id:72,q:3,time:"01:36",tM:16.6,team:"UVA",type:"Shot Wide",player:"Kate Galica",detail:"Shot wide",u:6,n:7},
+  {id:73,q:3,time:"01:22",tM:16.37,team:"UVA",type:"Shot Wide",player:"Megan Rocklein",detail:"Shot wide",u:6,n:7},
+  {id:74,q:3,time:"01:22",tM:16.37,team:"UVA",type:"Turnover",player:"Madison Alaimo",detail:"CT: Sloane Ginevan",u:6,n:7},
+  {id:75,q:3,time:"00:37",tM:15.62,team:"UVA",type:"Penalty",player:"Sophia Conti",detail:"Green Card",u:6,n:7},
+  // Q4
+  {id:76,q:4,time:"14:43",tM:14.72,team:"ND",type:"Shot Blocked",player:"Madison Rassas",detail:"Shot blocked",u:6,n:7},
+  {id:77,q:4,time:"14:26",tM:14.43,team:"ND",type:"Shot Saved",player:"Grace Maroney",detail:"Save: Finnelle",u:6,n:7},
+  {id:78,q:4,time:"14:10",tM:14.17,team:"UVA",type:"Shot Saved",player:"Addi Foster",detail:"Save: Patterson",u:6,n:7},
+  {id:79,q:4,time:"14:07",tM:14.12,team:"UVA",type:"Turnover",player:"Madison Alaimo",detail:"Unforced",u:6,n:7},
+  {id:80,q:4,time:"13:55",tM:13.92,team:"ND",type:"Clear Failed",player:"Team",detail:"Failed clear",u:6,n:7},
+  {id:81,q:4,time:"13:55",tM:13.92,team:"ND",type:"Turnover",player:"Abigail Lyons",detail:"CT: Kate Galica",u:6,n:7},
+  {id:82,q:4,time:"13:14",tM:13.23,team:"UVA",type:"Shot Saved",player:"Raleigh Foster",detail:"Save: Patterson",u:6,n:7},
+  {id:83,q:4,time:"12:54",tM:12.9,team:"ND",type:"Shot Saved",player:"Kate Timarky",detail:"Save: Finnelle",u:6,n:7},
+  {id:84,q:4,time:"11:51",tM:11.85,team:"UVA",type:"Shot Saved",player:"Jenna Dinardo",detail:"Save: Patterson",u:6,n:7},
+  {id:85,q:4,time:"11:46",tM:11.77,team:"ND",type:"Turnover",player:"C. Bacigalupo",detail:"Unforced",u:6,n:7},
+  {id:86,q:4,time:"09:32",tM:9.53,team:"UVA",type:"Goal (FP)",player:"Kate Galica",detail:"Free position goal",u:7,n:7},
+  {id:87,q:4,time:"09:32",tM:9.53,team:"ND",type:"Draw Control",player:"Uma Kowalski",detail:"Draw won",u:7,n:7},
+  {id:88,q:4,time:"09:07",tM:9.12,team:"ND",type:"Timeout",player:"Team",detail:"ND timeout",u:7,n:7},
+  {id:89,q:4,time:"07:51",tM:7.85,team:"ND",type:"Turnover",player:"Team",detail:"Clock violation",u:7,n:7},
+  {id:90,q:4,time:"06:49",tM:6.82,team:"ND",type:"Penalty",player:"Abigail Lyons",detail:"Green Card",u:7,n:7},
+  {id:91,q:4,time:"06:16",tM:6.27,team:"UVA",type:"Goal (Man-Up)",player:"Jenna Dinardo",detail:"Ast: Madison Alaimo, MU",u:8,n:7},
+  {id:92,q:4,time:"06:16",tM:6.27,team:"UVA",type:"Draw Control",player:"Kate Galica",detail:"Draw won",u:8,n:7},
+  {id:93,q:4,time:"04:43",tM:4.72,team:"UVA",type:"Shot Saved (FP)",player:"Kate Galica",detail:"Save: Patterson",u:8,n:7},
+  {id:94,q:4,time:"04:11",tM:4.18,team:"ND",type:"Turnover",player:"C. Bacigalupo",detail:"CT: Cady Flaherty",u:8,n:7},
+  {id:95,q:4,time:"03:33",tM:3.55,team:"UVA",type:"Goal",player:"Madison Alaimo",detail:"Ast: Kate Galica",u:9,n:7},
+  {id:96,q:4,time:"03:33",tM:3.55,team:"ND",type:"Timeout",player:"Team",detail:"ND timeout",u:9,n:7},
+  {id:97,q:4,time:"01:56",tM:1.93,team:"ND",type:"Penalty",player:"Julia Carr",detail:"Yellow Card",u:9,n:7},
+  {id:98,q:4,time:"01:42",tM:1.7,team:"UVA",type:"Shot Wide",player:"Cady Flaherty",detail:"Shot wide",u:9,n:7},
+  {id:99,q:4,time:"01:12",tM:1.2,team:"ND",type:"Penalty",player:"Abigail Lyons",detail:"Green Card",u:9,n:7},
+  {id:100,q:4,time:"01:02",tM:1.03,team:"ND",type:"Penalty",player:"Shannon Earley",detail:"Green Card",u:9,n:7},
+  {id:101,q:4,time:"00:00",tM:0,team:"--",type:"Game End",player:"--",detail:"Final: UVA 9, ND 7",u:9,n:7},
+];
+
+// Compute WP
+const wpArr=plays.map((p,i)=>{
+  let mom=0;
+  if(i>0){const r=plays.slice(Math.max(0,i-5),i);mom=r.filter(x=>x.team==="UVA"&&(x.type.includes("Goal")||x.type==="Draw Control")).length-r.filter(x=>x.team==="ND"&&(x.type.includes("Goal")||x.type==="Draw Control")).length;}
+  const w=wp(p.u,p.n,p.tM,mom);
+  return{...p,wp:Math.round(w*1000)/10,wpR:w};
+});
+
+// WPA
+const wpaArr=wpArr.map((p,i)=>{
+  if(i===0)return{...p,wpa:0};
+  return{...p,wpa:Math.round((p.wpR-wpArr[i-1].wpR)*1000)/10};
+}).filter(p=>p.id>0);
+
+// Player WPA
+const pW={};
+wpaArr.forEach(p=>{
+  if(p.player==="--"||p.player==="Team")return;
+  const k=p.team+"|"+p.player;
+  if(!pW[k])pW[k]={team:p.team,player:p.player,tot:0,plays:0,pos:0,neg:0,goals:0,tos:0,draws:0};
+  pW[k].tot+=p.wpa;pW[k].plays++;
+  if(p.wpa>0)pW[k].pos+=p.wpa;
+  if(p.wpa<0)pW[k].neg+=p.wpa;
+  if(p.type.includes("Goal"))pW[k].goals++;
+  if(p.type==="Turnover")pW[k].tos++;
+  if(p.type==="Draw Control")pW[k].draws++;
+});
+const uvaP=Object.values(pW).filter(p=>p.team==="UVA").sort((a,b)=>b.tot-a.tot);
+const ndP=Object.values(pW).filter(p=>p.team==="ND").sort((a,b)=>b.tot-a.tot);
+
+// Play type agg
+const ptI={};
+wpaArr.forEach(p=>{
+  let c=p.type;
+  if(c.includes("Goal"))c="Goal";
+  else if(c.includes("Shot"))c="Shot (No Goal)";
+  else if(c.includes("Clear"))c="Clear";
+  if(!ptI[c])ptI[c]={type:c,count:0,tot:0,uC:0,nC:0};
+  ptI[c].count++;ptI[c].tot+=p.wpa;
+  if(p.team==="UVA")ptI[c].uC++;else ptI[c].nC++;
+});
+Object.values(ptI).forEach(t=>{t.avg=Math.round((t.tot/t.count)*10)/10});
+const ptArr=Object.values(ptI).sort((a,b)=>Math.abs(b.tot)-Math.abs(a.tot));
+
+// TABS
+const tabNames=["Win Probability","Play Impact (WPA)","Play Type Breakdown","UVA Players","ND Players","Key Moments"];
+const tabBar=document.getElementById("tabBar");
+tabNames.forEach((name,i)=>{
+  const btn=document.createElement("button");
+  btn.className="tab-btn"+(i===0?" active":"");btn.textContent=name;
+  btn.onclick=()=>{document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));btn.classList.add("active");document.getElementById("p-"+i).classList.add("active");};
+  tabBar.appendChild(btn);
+});
+
+// CHARTS
+const wpLabels=wpArr.map(p=>"Q"+p.q+" "+p.time);
+const wpVals=wpArr.map(p=>p.wp);
+document.getElementById("peakWP").textContent=Math.max(...wpVals).toFixed(1)+"%";
+document.getElementById("lowWP").textContent=Math.min(...wpVals).toFixed(1)+"%";
+
+new Chart(document.getElementById("wpChart"),{
+  type:"line",
+  data:{labels:wpLabels,datasets:[{label:"UVA Win %",data:wpVals,borderColor:O,backgroundColor:"rgba(229,114,0,0.1)",fill:true,tension:.3,pointRadius:0,pointHitRadius:10,pointHoverRadius:5,pointHoverBackgroundColor:O,borderWidth:2.5}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#1a1a2e",borderColor:O,borderWidth:1,callbacks:{title:items=>{const p=wpArr[items[0].dataIndex];return`Q${p.q} — ${p.time}`;},label:item=>{const p=wpArr[item.dataIndex];return[`${p.team} | ${p.type}`,`Player: ${p.player}`,p.detail,`UVA Win%: ${p.wp}% | Score: ${p.u}-${p.n}`];}}}},scales:{x:{ticks:{color:"#484f58",maxTicksLimit:12,font:{size:10}},grid:{color:"#21262d"}},y:{min:0,max:100,ticks:{color:"#484f58",callback:v=>v+"%",font:{size:10}},grid:{color:"#21262d"}}}}
+});
+
+new Chart(document.getElementById("wpaChart"),{
+  type:"bar",
+  data:{labels:wpaArr.map(p=>p.id),datasets:[{label:"WPA",data:wpaArr.map(p=>p.wpa),backgroundColor:wpaArr.map(p=>p.wpa>0?GR+"CC":p.wpa<-2?"#d32f2fCC":RD+"99"),borderRadius:2,borderSkipped:false}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#1a1a2e",borderColor:"#444",borderWidth:1,callbacks:{title:items=>{const p=wpaArr[items[0].dataIndex];return`Q${p.q} — ${p.time} | ${p.team}`;},label:item=>{const p=wpaArr[item.dataIndex];return[`${p.type}: ${p.player}`,`WPA: ${p.wpa>0?"+":""}${p.wpa}%`];}}}},scales:{x:{ticks:{color:"#484f58",font:{size:9},maxTicksLimit:20},grid:{display:false}},y:{ticks:{color:"#484f58",callback:v=>v+"%"},grid:{color:"#21262d"}}}}
+});
+
+// Top plays
+const sorted=[...wpaArr].sort((a,b)=>Math.abs(b.wpa)-Math.abs(a.wpa)).slice(0,12);
+const topEl=document.getElementById("topPlays");
+sorted.forEach(p=>{
+  const cls=p.wpa>0?"pos":"neg",tcls=p.team==="UVA"?"uva":"nd";
+  topEl.innerHTML+=`<div class="play-item" style="border:1px solid ${p.wpa>0?GR+'40':RD+'40'}"><div><span class="team-tag ${tcls}">${p.team}</span><span style="font-weight:600">${p.type}</span><span style="color:var(--t2);margin-left:6px">— ${p.player}</span><span style="color:var(--t3);margin-left:6px;font-size:11px">Q${p.q} ${p.time}</span></div><div class="wpa-val ${cls}">${p.wpa>0?"+":""}${p.wpa}%</div></div>`;
+});
+
+// Play type chart
+new Chart(document.getElementById("ptChart"),{
+  type:"bar",
+  data:{labels:ptArr.map(p=>p.type),datasets:[{label:"Total WPA",data:ptArr.map(p=>Math.round(p.tot*10)/10),backgroundColor:ptArr.map(p=>p.tot>0?GR+"CC":RD+"CC"),borderRadius:4}]},
+  options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:item=>`Total WPA: ${item.raw>0?"+":""}${item.raw}%`}}},scales:{x:{ticks:{color:"#484f58",callback:v=>v+"%"},grid:{color:"#21262d"}},y:{ticks:{color:"#8b949e",font:{size:12}},grid:{display:false}}}}
+});
+
+const ptC=document.getElementById("ptCards");
+ptArr.forEach(pt=>{
+  const cls=pt.tot>0?"pos":pt.tot<0?"neg":"";
+  ptC.innerHTML+=`<div class="pt-card"><div class="pt-name">${pt.type}</div><div class="pt-val ${cls}">${pt.tot>0?"+":""}${pt.tot.toFixed(1)}%</div><div class="pt-meta">${pt.count} plays | Avg: ${pt.avg>0?"+":""}${pt.avg}%</div><div class="pt-meta">UVA: ${pt.uC} | ND: ${pt.nC}</div></div>`;
+});
+
+// UVA Player chart
+new Chart(document.getElementById("uvaChart"),{
+  type:"bar",data:{labels:uvaP.map(p=>p.player),datasets:[{label:"WPA",data:uvaP.map(p=>Math.round(p.tot*10)/10),backgroundColor:uvaP.map(p=>p.tot>0?O+"DD":RD+"CC"),borderRadius:4}]},
+  options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:item=>`WPA: ${item.raw>0?"+":""}${item.raw}%`}}},scales:{x:{ticks:{color:"#484f58",callback:v=>v+"%"},grid:{color:"#21262d"}},y:{ticks:{color:"#8b949e",font:{size:11}},grid:{display:false}}}}
+});
+
+const uC=document.getElementById("uvaCards");
+uvaP.filter(p=>Math.abs(p.tot)>0.3||p.plays>2).forEach(p=>{
+  const cls=p.tot>0?"pos":"neg",pct=Math.min(100,Math.max(5,(p.pos/(p.pos+Math.abs(p.neg)+.01))*100));
+  uC.innerHTML+=`<div class="p-card uva"><div class="p-top"><span class="pname uva">${p.player}</span><span class="pwpa ${cls}">${p.tot>0?"+":""}${p.tot.toFixed(1)}%</span></div><div class="p-stats"><span>Plays: ${p.plays}</span><span>+WPA: +${p.pos.toFixed(1)}%</span><span>Goals: ${p.goals}</span><span>-WPA: ${p.neg.toFixed(1)}%</span><span>TOs: ${p.tos}</span><span>Draws: ${p.draws}</span></div><div class="bar-bg"><div class="bar-fill uva" style="width:${pct}%"></div></div></div>`;
+});
+
+// ND Player chart
+new Chart(document.getElementById("ndChart"),{
+  type:"bar",data:{labels:ndP.map(p=>p.player),datasets:[{label:"WPA vs UVA",data:ndP.map(p=>Math.round(p.tot*10)/10),backgroundColor:ndP.map(p=>p.tot<0?G+"DD":GR+"CC"),borderRadius:4}]},
+  options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:item=>`WPA: ${item.raw>0?"+":""}${item.raw}%`}}},scales:{x:{ticks:{color:"#484f58",callback:v=>v+"%"},grid:{color:"#21262d"}},y:{ticks:{color:"#8b949e",font:{size:11}},grid:{display:false}}}}
+});
+
+const nC=document.getElementById("ndCards");
+ndP.filter(p=>Math.abs(p.tot)>0.5).forEach(p=>{
+  const cls=p.tot<0?"neg":"pos";
+  nC.innerHTML+=`<div class="p-card nd"><div class="p-top"><span class="pname nd">${p.player}</span><span class="pwpa ${cls}">${p.tot.toFixed(1)}%</span></div><div class="p-stats"><span>Plays: ${p.plays}</span><span>Goals: ${p.goals}</span><span>Draws: ${p.draws}</span><span>TOs: ${p.tos}</span></div></div>`;
+});
+
+// Key Moments
+const moments=[
+  {title:"Q1 Free Position Nightmare (5:53–4:03)",desc:"Down 1-1, two consecutive free position goals by Murphy and Maroney put UVA in a 1-3 hole. Both came off fouls by Alexandra Schneider. The defense was giving up cheap fouls in the 8-meter arc and Notre Dame made them pay. Virginia called timeout at 4:03 — this was a gut-check moment.",wpa:-14.2,color:RD},
+  {title:"Q2 Five-Goal Explosion (14:25–0:43)",desc:"This was the quarter that won the game. Alaimo's man-up goal off the Rassas green card got things started. Then Raleigh Foster tied it at 3-3, and after Lyons briefly restored ND's lead, UVA rattled off THREE straight — Galica, Addi Foster, Galica again — to take a 6-4 lead into the half. Five goals on 11 shots. The ball movement was crisp and the offense was decisive.",wpa:+28.5,color:GR},
+  {title:"Q3 Notre Dame's 3-0 Run (7:21–3:40)",desc:"Virginia went scoreless in Q3 with 6 turnovers. Notre Dame capitalized: Maroney at 7:21, Mallaber at 5:39, and Mallaber again on a free position at 3:40 to take a 7-6 lead. UVA's 6 turnovers in 15 minutes of lacrosse nearly gave the game away. The Dinardo turnovers (2 in Q3) and Alaimo's forced errors were the biggest culprits.",wpa:-22.8,color:RD},
+  {title:"Q4 Clutch Sequence (9:32–3:33)",desc:"Down 6-7, Virginia responded with three unanswered goals. Galica's FP goal at 9:32 tied it. Then Notre Dame burned a timeout and committed a clock violation — you could feel the pressure building. Dinardo's man-up goal at 6:16 (off Lyons' green card) put UVA ahead, and Alaimo's insurance goal at 3:33 sealed it. Notre Dame scored ZERO goals in Q4 on just 3 shots. The defense was suffocating.",wpa:+24.1,color:GR},
+  {title:"Kate Galica's Complete Performance",desc:"3 goals, 2 assists, 8 draw controls, 2 ground balls, 1 caused turnover. Galica was everywhere. She won draws, created offense, and finished. Her 8 draw controls alone were responsible for an estimated 4-5 extra possessions. She was the engine of the Q2 run and the Q4 comeback. Best individual performance of the season so far.",wpa:"+18.3 total",color:O},
+  {title:"Defensive Q4 Shutout",desc:"After allowing 3 goals in Q3, the defense completely locked down in Q4. Notre Dame managed just 3 shots (0 goals) in the final 15 minutes. Kate Demark had 3 caused turnovers in the game. Cady Flaherty had 2 CTs. Sophia Conti had 2 CTs. The unit tightened when it mattered most, and Finnelle made two clutch saves on Maroney and Timarky early in Q4 to keep it at 6-7.",wpa:"+8.0 aggregate",color:GR},
+];
+
+const mEl=document.getElementById("moments");
+moments.forEach(km=>{
+  const wpaStr=typeof km.wpa==="number"?((km.wpa>0?"+":"")+km.wpa+"%"):km.wpa;
+  mEl.innerHTML+=`<div class="moment" style="border-left-color:${km.color};border-color:${km.color}30"><div class="top"><h3>${km.title}</h3><span class="mwpa" style="color:${km.color}">${wpaStr} WPA</span></div><p>${km.desc}</p></div>`;
+});
+</script>
+</body>
+</html>

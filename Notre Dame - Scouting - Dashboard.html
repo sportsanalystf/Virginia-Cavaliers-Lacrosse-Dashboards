@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notre Dame WLax Scouting — Virginia Opponent Intel 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0C2340;
+  --gold: #C99700;
+  --gold-light: #FFD54F;
+  --bg: #070d18;
+  --card: rgba(255,255,255,0.03);
+  --border: rgba(255,255,255,0.08);
+  --red: #e74c3c;
+  --green: #27ae60;
+  --orange: #f39c12;
+  --text: #ffffffdd;
+  --muted: rgba(255,255,255,0.5);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Barlow', sans-serif;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--navy) 100%);
+  color: var(--text);
+  min-height: 100vh;
+}
+h1, h2, h3 { font-family: 'Barlow Condensed', sans-serif; }
+
+/* HEADER */
+.header {
+  padding: 20px 28px 14px;
+  border-bottom: 3px solid var(--gold);
+  background: linear-gradient(90deg, var(--navy), #162a48, var(--navy));
+  position: relative;
+  overflow: hidden;
+}
+.header::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,0.01) 60px, rgba(255,255,255,0.01) 61px);
+}
+.header-inner { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; }
+.logo {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--gold); display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed'; font-size: 20px; font-weight: 900; color: var(--navy);
+  flex-shrink: 0;
+}
+.header h1 { font-size: 22px; font-weight: 900; letter-spacing: 3px; color: var(--gold); line-height: 1.1; }
+.header p { font-size: 11px; color: var(--muted); letter-spacing: 1px; margin-top: 2px; }
+
+/* TABS */
+.tabs {
+  display: flex; overflow-x: auto; background: rgba(0,0,0,0.3);
+  border-bottom: 1px solid var(--border);
+  -webkit-overflow-scrolling: touch;
+}
+.tabs button {
+  padding: 10px 18px; border: none; cursor: pointer;
+  background: transparent; color: var(--muted);
+  font-family: 'Barlow Condensed'; font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
+  white-space: nowrap; transition: all 0.2s; border-bottom: 2px solid transparent;
+  text-transform: uppercase;
+}
+.tabs button:hover { color: #fff; }
+.tabs button.active {
+  background: var(--gold); color: var(--navy);
+  border-bottom-color: var(--gold-light);
+}
+
+/* FILTERS */
+.filters {
+  padding: 10px 28px; display: flex; gap: 6px; flex-wrap: wrap;
+  background: rgba(0,0,0,0.15); border-bottom: 1px solid var(--border);
+}
+.filters button {
+  padding: 4px 14px; border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: transparent; color: var(--muted);
+  font-family: 'Barlow'; font-size: 10px; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+}
+.filters button.active {
+  border-color: var(--gold); background: rgba(201,151,0,0.15); color: var(--gold);
+}
+.filters button.player-active {
+  border-color: var(--red); background: rgba(231,76,60,0.15); color: #ff6b6b;
+}
+.filter-sep { width: 1px; height: 22px; background: var(--border); align-self: center; margin: 0 4px; }
+
+/* CONTENT */
+.content { padding: 18px 28px 40px; display: none; }
+.content.active { display: block; }
+
+/* SECTION TITLE */
+.sec-title { font-size: 15px; font-weight: 900; color: var(--gold); letter-spacing: 1px; margin-bottom: 2px; }
+.sec-sub { font-size: 11px; color: var(--muted); margin-bottom: 14px; }
+
+/* INTERPRETATION BOX */
+.interp {
+  margin-top: 16px; padding: 14px 16px;
+  background: rgba(201,151,0,0.06); border-radius: 8px;
+  border: 1px solid rgba(201,151,0,0.12);
+}
+.interp-title { font-size: 11px; font-weight: 800; color: var(--gold); margin-bottom: 6px; letter-spacing: 0.5px; }
+.interp p { font-size: 11px; color: rgba(255,255,255,0.7); line-height: 1.8; margin-bottom: 6px; }
+.interp p:last-child { margin-bottom: 0; }
+.interp strong { color: var(--gold-light); }
+.interp em { color: var(--red); font-style: normal; font-weight: 700; }
+
+.warning-box {
+  margin-top: 14px; padding: 12px 16px;
+  background: rgba(231,76,60,0.08); border-radius: 8px;
+  border: 1px solid rgba(231,76,60,0.2);
+}
+.warning-box .interp-title { color: var(--red); }
+.warning-box p { font-size: 11px; color: rgba(255,255,255,0.7); line-height: 1.8; }
+
+/* CAGE GRID */
+.cage-wrap { text-align: center; margin: 10px 0; }
+.cage-title { font-size: 15px; font-weight: 800; color: var(--gold); letter-spacing: 1px; }
+.cage-sub { font-size: 10px; color: var(--muted); margin-bottom: 8px; }
+.cage-outer { position: relative; width: 380px; margin: 0 auto; }
+.cage-goal-label {
+  position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+  width: 90px; height: 20px; background: #fff; border-radius: 6px 6px 0 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 900; color: var(--navy); z-index: 2;
+}
+.cage-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;
+  border: 3px solid rgba(255,255,255,0.4); border-radius: 10px;
+  overflow: hidden; padding-top: 8px;
+}
+.cage-cell {
+  padding: 22px 8px; text-align: center;
+  min-height: 90px; display: flex; flex-direction: column; justify-content: center;
+  transition: all 0.3s;
+}
+.cage-cell:hover { filter: brightness(1.2); }
+.cage-pct { font-size: 26px; font-weight: 900; color: #fff; font-family: 'Barlow Condensed'; }
+.cage-count { font-size: 12px; color: rgba(255,255,255,0.8); }
+.cage-label { font-size: 9px; color: rgba(255,255,255,0.5); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* TARGET CARDS */
+.targets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+.target-card {
+  padding: 10px 12px; border-radius: 6px; transition: transform 0.2s;
+}
+.target-card:hover { transform: translateY(-2px); }
+.target-card.exploit { background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.2); }
+.target-card.avoid { background: rgba(39,174,96,0.1); border: 1px solid rgba(39,174,96,0.2); }
+.target-zone { font-size: 12px; font-weight: 800; }
+.target-card.exploit .target-zone { color: var(--red); }
+.target-card.avoid .target-zone { color: var(--green); }
+.target-tip { font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+
+/* SCORING RUNS */
+.run-game { padding: 14px; background: var(--card); border-radius: 8px; border: 1px solid var(--border); margin-bottom: 16px; }
+.run-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+.run-team { font-size: 14px; font-weight: 800; color: var(--gold); font-family: 'Barlow Condensed'; }
+.run-final { font-size: 12px; color: var(--muted); }
+.run-bars { display: flex; gap: 8px; align-items: end; height: 110px; }
+.run-quarter { flex: 1; text-align: center; }
+.run-pair { display: flex; gap: 3px; justify-content: center; align-items: end; height: 80px; }
+.run-bar { width: 32px; border-radius: 4px 4px 0 0; position: relative; transition: height 0.5s; }
+.run-bar .val { position: absolute; top: -18px; width: 100%; text-align: center; font-size: 14px; font-weight: 900; }
+.run-qlabel { font-size: 10px; color: var(--muted); font-weight: 600; margin-top: 4px; }
+.run-alert { font-size: 8px; color: var(--gold-light); font-weight: 800; letter-spacing: 1px; }
+.run-callout {
+  margin-top: 8px; padding: 6px 10px;
+  background: rgba(255,213,79,0.08); border-radius: 5px;
+  border: 1px solid rgba(255,213,79,0.15);
+  font-size: 10px; color: var(--gold-light);
+}
+
+/* PLAYER CARDS */
+.player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+.p-card {
+  padding: 14px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--card); transition: transform 0.2s, border-color 0.2s;
+}
+.p-card:hover { transform: translateY(-2px); border-color: rgba(201,151,0,0.3); }
+.p-top { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.p-name { font-size: 14px; font-weight: 800; }
+.p-meta { font-size: 9px; color: var(--muted); }
+.p-goals { font-size: 22px; font-weight: 900; color: var(--gold); font-family: 'Barlow Condensed'; }
+.p-stats { display: flex; gap: 12px; font-size: 10px; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
+.p-conv { color: var(--gold); font-weight: 700; }
+.p-bars { display: flex; gap: 3px; align-items: end; height: 30px; }
+.p-bar { flex: 1; border-radius: 2px; }
+.p-bar-label { font-size: 7px; color: rgba(255,255,255,0.25); text-align: center; margin-top: 2px; }
+
+/* SOURCES */
+.src-group { margin-bottom: 18px; }
+.src-cat { font-size: 12px; font-weight: 800; color: var(--gold); letter-spacing: 1px; margin-bottom: 8px; }
+.src-item {
+  padding: 10px 12px; margin-bottom: 4px;
+  background: var(--card); border-radius: 5px;
+  border: 1px solid var(--border);
+}
+.src-name { font-size: 11px; font-weight: 700; color: #fff; }
+.src-url { font-size: 9px; color: rgba(201,151,0,0.7); font-family: monospace; margin-top: 1px; }
+.src-note { font-size: 9px; color: var(--muted); margin-top: 3px; }
+.src-item.warn { border-color: rgba(243,156,18,0.3); background: rgba(243,156,18,0.04); }
+
+/* SVG */
+svg { display: block; margin: 0 auto; }
+
+/* PRINT */
+@media print {
+  body { background: #fff; color: #000; }
+  .tabs, .filters { display: none; }
+  .content { display: block !important; page-break-inside: avoid; }
+  .header { background: #fff; border-color: var(--navy); }
+  .header h1 { color: var(--navy); }
+}
+
+/* RESPONSIVE */
+@media (max-width: 640px) {
+  .header { padding: 14px 16px 10px; }
+  .header h1 { font-size: 16px; letter-spacing: 1px; }
+  .content { padding: 14px 16px 30px; }
+  .targets { grid-template-columns: 1fr; }
+  .player-grid { grid-template-columns: 1fr; }
+  .cage-outer { width: 100%; max-width: 380px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">ND</div>
+    <div>
+      <h1>NOTRE DAME SCOUTING DASHBOARD</h1>
+      <p>2026 SEASON · 4 GAMES (4-0, #15 RANKED) · OPPONENT INTELLIGENCE FOR VIRGINIA WOMEN'S LACROSSE</p>
+      <p style="margin-top:4px;color:rgba(255,255,255,0.35);font-size:9px">PREPARED BY UVA ATHLETICS ANALYTICS · FEB 21 2026 · ACC OPENER FEB 22 @ ARLOTTA STADIUM</p>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs" id="tabs">
+  <button class="active" data-tab="field">◎ SHOT MAP</button>
+  <button data-tab="cage">▣ CAGE ZONES</button>
+  <button data-tab="gk">🥅 GK WEAKNESS</button>
+  <button data-tab="network">⬡ ASSIST NETWORK</button>
+  <button data-tab="runs">📈 SCORING RUNS</button>
+  <button data-tab="players">🎯 PLAYER CARDS</button>
+  <button data-tab="sources">📋 DATA SOURCES</button>
+</div>
+
+<!-- FILTERS -->
+<div class="filters" id="filters">
+  <button class="active" data-game="All">ALL GAMES</button>
+  <button data-game="Michigan">vs Michigan</button>
+  <button data-game="CMU">vs CMU</button>
+  <button data-game="BC">vs BC</button>
+  <button data-game="Harvard">vs Harvard</button>
+  <div class="filter-sep"></div>
+  <button class="active" data-player="All">ALL PLAYERS</button>
+  <button data-player="rassas">Rassas</button>
+  <button data-player="timarky">Timarky</button>
+  <button data-player="maroney">Maroney</button>
+  <button data-player="irish">Irish</button>
+  <button data-player="ohare">O'Hare</button>
+  <button data-player="bacigalupo">Bacigalupo</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- TAB 1: FIELD SHOT MAP                                                     -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div class="content active" id="tab-field">
+  <h2 class="sec-title">FIELD SHOT MAP — WHERE NOTRE DAME SHOOTS FROM</h2>
+  <p class="sec-sub">Proper 8m arc & 12m fan geometry · ● Direct shot · ◆ Bounce/shovel · Gold = Goal · Gray = Miss/Save</p>
+  <svg id="field-svg" width="560" height="580"></svg>
+
+  <div class="interp">
+    <div class="interp-title">HOW TO READ THIS CHART</div>
+    <p>Each dot represents one shot attempt across Notre Dame's 4 games. <strong>Gold dots/diamonds = goals scored</strong>, gray = missed or saved. The field shows the correct NCAA women's lacrosse markings: the inner circle is the crease (2.6m), the solid arc is the 8-meter, and the dashed arc is the 12-meter fan.</p>
+    <p><strong>Diamonds (◆)</strong> represent bounce or shovel shots — the ball hits the ground before reaching the cage. These are primarily Timarky's signature move from close range near the crease.</p>
+    <p>Use the player filter buttons above to isolate individual shooting tendencies. This is the most important pre-game tool for defensive assignment planning.</p>
+  </div>
+
+  <div class="interp" style="margin-top:10px">
+    <div class="interp-title">COACHING INTERPRETATION</div>
+    <p><strong>Timarky</strong> (filter her name above) clusters almost entirely inside the crease with bounce shots. She is a <em>point-blank finisher</em> — if she catches the ball within 3 meters of the cage, she scores at 55%+. Virginia's low defender MUST body her out of this zone before the pass arrives.</p>
+    <p><strong>Rassas</strong> operates from the right side of the 8m arc at mid-range (4-7m). She shoots direct and hard. Force her wider — her conversion drops significantly past the 8m line. Do NOT let her drive inside the arc uncontested.</p>
+    <p><strong>Maroney</strong> (Fr.) is the X-factor — she'll shoot from anywhere through traffic. She scored 3 vs #3 BC from three different zones. She's unpredictable, which makes her dangerous but also less efficient at any single spot.</p>
+    <p><strong>Zone summary:</strong> Crease shots convert at the highest rate (~58%), 8m arc is their volume zone (~48%), and 12m+ shots are low-percentage (~20%). ND's offense is designed to get the ball inside the 8m.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- TAB 2: CAGE ZONE CONVERSION                                               -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div class="content" id="tab-cage">
+  <h2 class="sec-title">SHOT ON GOAL — CAGE ZONE CONVERSION MAP</h2>
+  <p class="sec-sub">Where Notre Dame places shots on the goal face (from the attacker's perspective facing the goal)</p>
+
+  <div class="cage-wrap">
+    <div class="cage-title">NOTRE DAME OFFENSIVE SHOT PLACEMENT</div>
+    <div class="cage-sub">Goals / Shots on Goal by Zone — 4 Games (2026)</div>
+    <div class="cage-outer">
+      <div class="cage-goal-label">GOAL</div>
+      <div class="cage-grid" id="nd-cage-grid"></div>
+    </div>
+  </div>
+
+  <div class="interp">
+    <div class="interp-title">HOW TO READ THIS CHART</div>
+    <p>This is the goal face divided into 9 zones, viewed <strong>from the attacker's perspective</strong> (i.e., as the shooter sees the cage). The percentages show goal conversion rate — how often a shot placed in that zone results in a goal. Higher percentage + darker gold = more dangerous zone.</p>
+    <p>The fraction (e.g., "14/20") shows goals scored out of total shots directed at that zone.</p>
+  </div>
+
+  <div class="interp" style="margin-top:10px">
+    <div class="interp-title">COACHING INTERPRETATION</div>
+    <p><strong>Low zones are ND's money spots:</strong> Low-center converts at <em>70% (14/20)</em> and low-left/low-right at <em>64%</em>. This is overwhelmingly where Timarky's shovel shots and Rassas's low drives finish. If you see an ND attacker loading up near the crease, the shot is going low.</p>
+    <p><strong>Mid-tier is their volume zone:</strong> Mid-center (57%, 16/28) is where the most shots go. This is the natural center-mass target for most shooters. Mid-left and mid-right are both at 56%.</p>
+    <p><strong>Top corners are weak:</strong> Top-left at 25%, top-right at 29%. ND rarely beats goalkeepers high. This tells us their shooters favor quick-release low shots over placement shots to the upper corners.</p>
+    <p><strong>For Finnelle:</strong> Anticipate low shots. Set your stance low. On crease feeds, cheat down and force the shooter to go top shelf — ND is not comfortable there.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- TAB 3: GOALKEEPER WEAKNESS                                                -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div class="content" id="tab-gk">
+  <h2 class="sec-title">CECI PATTERSON — GOALKEEPER WEAKNESS MAP</h2>
+  <p class="sec-sub">Save % by cage zone · Red = Virginia should exploit · Green = Avoid · Based on 3 competitive games</p>
+
+  <div class="cage-wrap">
+    <div class="cage-title">PATTERSON SAVE % BY ZONE</div>
+    <div class="cage-sub">From attacker's perspective — Lower % = Virginia should target here</div>
+    <div class="cage-outer">
+      <div class="cage-goal-label">GOAL</div>
+      <div class="cage-grid" id="gk-cage-grid"></div>
+    </div>
+  </div>
+
+  <div class="interp">
+    <div class="interp-title">HOW TO READ THIS CHART</div>
+    <p>This shows <strong>Ceci Patterson's save percentage</strong> by zone — how often she STOPS shots aimed at each part of the goal. <em>Red zones = she struggles there (low save %)</em>, green = she's strong there (high save %). Virginia should aim for the red zones.</p>
+    <p>Patterson is a <strong>true freshman with 4 career starts</strong>. These tendencies are early-season reads, not locked-in patterns. But the low-zone weakness is consistent across all 3 competitive games (Michigan, BC, Harvard).</p>
+  </div>
+
+  <h3 style="font-size:13px;color:var(--red);margin-top:20px;font-weight:800">🎯 VIRGINIA SHOOTING TARGETS (PRIORITY ORDER)</h3>
+  <div class="targets" id="gk-targets"></div>
+
+  <div class="interp" style="margin-top:14px">
+    <div class="interp-title">COACHING INTERPRETATION</div>
+    <p><strong>Patterson's entire low zone is weak</strong> — save percentages of 25-29% across the bottom three cells. She struggles to get down quickly, especially on shots to her left (attacker's low-left). This is a freshman positioning issue: she sets too high and can't recover downward.</p>
+    <p><strong>Mid-center is a volume trap:</strong> Only 29% save rate on 14 shots. When Virginia drives to the crease and releases point-blank, Patterson doesn't have the reaction time. She needs time to set — <em>don't give it to her.</em></p>
+    <p><strong>Top-left is her best zone</strong> (67% save rate). She tracks high-left shots well and positions her body there naturally. Shooting top-left plays into her strength. Avoid it.</p>
+    <p><strong>In-game adjustment:</strong> If Patterson makes 3+ early saves and looks settled, switch to skip shots and off-angle releases to test her footwork laterally. Freshman goalkeepers struggle most with shots that force them to move and reset.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- TAB 4: ASSIST NETWORK                                                     -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div class="content" id="tab-network">
+  <h2 class="sec-title">ASSIST NETWORK — OFFENSIVE CONNECTION MAP</h2>
+  <p class="sec-sub">Arrow direction = assister → scorer · Thicker arrow = more frequent connection · Larger node = more goals scored</p>
+  <svg id="network-svg" width="560" height="480" style="background:var(--bg);border-radius:8px"></svg>
+
+  <div class="interp">
+    <div class="interp-title">HOW TO READ THIS CHART</div>
+    <p>This is a force-directed network graph showing <strong>who assists whom</strong> on Notre Dame's offense. Each node (circle) is a player — the bigger the node, the more total goals they've scored. Arrows point from the <strong>assister to the scorer</strong>, and thicker arrows mean that connection happened more frequently across the 4 games.</p>
+    <p>Players who are central to the network (many arrows in/out) are the <strong>offensive hubs</strong>. Isolating them defensively disrupts the entire system.</p>
+  </div>
+
+  <div class="interp" style="margin-top:10px">
+    <div class="interp-title">COACHING INTERPRETATION</div>
+    <p><strong>Maura Irish (Fr, #3) is the offensive hub.</strong> She has assist connections to Rassas (2x), Timarky, Maroney, and O'Hare. She is the primary distributor — the ball flows through her on most settled offensive possessions. <em>Disrupting Irish's passing lanes is the single highest-leverage defensive action Virginia can take.</em></p>
+    <p><strong>Morrissey (#14) is the secondary distributor</strong> — she feeds wide to Rassas, Timarky, Bacigalupo, Maroney, and Conley. She spreads the ball more broadly than Irish, making her harder to completely neutralize but less devastating on any single connection.</p>
+    <p><strong>The Rassas ↔ Timarky connection is reciprocal.</strong> They assist each other — meaning when Virginia doubles one, the other becomes the immediate release valve. Virginia should plan for this: the double team on Rassas must be accompanied by a recovering defender on Timarky, not a gamble.</p>
+    <p><strong>O'Hare (#5) is a two-way hub.</strong> She both feeds and scores. She connects to Irish, Rassas, and Timarky. On defense she disrupts — on offense she's the third passing lane. Don't ignore her in the game plan.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- TAB 5: SCORING RUNS                                                       -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div class="content" id="tab-runs">
+  <h2 class="sec-title">QUARTER-BY-QUARTER SCORING — RUN ANALYSIS</h2>
+  <p class="sec-sub">Gold bars = Notre Dame · Gray = Opponent · Highlighted = 3+ goal differential (scoring run)</p>
+  <div id="runs-container"></div>
+
+  <div class="interp">
+    <div class="interp-title">HOW TO READ THIS CHART</div>
+    <p>Each game shows four quarter groupings with paired bars — <strong>gold = Notre Dame goals that quarter</strong>, gray = opponent. When a quarter shows the ⚡RUN indicator, it means ND outscored the opponent by 3+ goals in that quarter — a significant scoring burst.</p>
+    <p>The yellow callout boxes describe the specifics of each run: who scored, how fast, and what triggered it.</p>
+  </div>
+
+  <div class="warning-box">
+    <div class="interp-title">⚠ CRITICAL WARNING FOR COACHING STAFF</div>
+    <p>Notre Dame is a <strong>scoring-run team</strong>. This is the #1 behavioral pattern from the first 4 games:</p>
+    <p>• <strong>vs #3 BC:</strong> Trailed 9-6 entering Q4. Scored <em>6 unanswered goals</em> in the final frame — including 2 by Rassas in the first 65 seconds. BC scored ZERO in Q4.</p>
+    <p>• <strong>vs #25 Harvard:</strong> Trailed <em>0-6</em>. Scored 10 of the final 11 goals. Timarky scored 3 in Q2 alone to ignite the comeback.</p>
+    <p>These are not gradual comebacks — they are <em>explosive 5-8 minute stretches</em> where Notre Dame accelerates tempo and opponents freeze.</p>
+    <p style="margin-top:8px;color:var(--red);font-weight:700">RULE: Call timeout after ANY 2-0 Notre Dame run. Do not wait for 3-0. By the time it reaches 4-0, the game dynamic has already shifted and the damage is done.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- TAB 6: PLAYER CARDS                                                       -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div class="content" id="tab-players">
+  <h2 class="sec-title">OFFENSIVE PLAYER PRODUCTION CARDS</h2>
+  <p class="sec-sub">Season totals through 4 games · Per-game goal sparklines · Conversion rate = goals/shots</p>
+  <div class="player-grid" id="player-grid"></div>
+
+  <div class="interp" style="margin-top:16px">
+    <div class="interp-title">HOW TO READ THESE CARDS</div>
+    <p>Each card shows one player's offensive output. The <strong>big gold number</strong> is total goals scored. Below it: assists, total points (G+A), shot attempts, and <strong>conversion rate</strong> (goals ÷ shots — a measure of shooting efficiency).</p>
+    <p>The small bar chart at the bottom shows <strong>goals per game</strong> — taller = more goals. Gold bars indicate a hat trick (3+ goals). This reveals game-to-game consistency vs. hot/cold patterns.</p>
+  </div>
+
+  <div class="interp" style="margin-top:10px">
+    <div class="interp-title">DEFENSIVE PRIORITY ORDER FOR VIRGINIA</div>
+    <p><strong>1. Timarky (13G, 54% conv)</strong> — The most efficient scorer on the roster. Close-range specialist who converts over half her shots. Must be bodied out of the crease zone before the pass arrives. If she catches the ball within 3m, she scores.</p>
+    <p><strong>2. Rassas (9G, 43% conv, Tewaaraton Watch)</strong> — Power shooter from mid-range. She scored 9 in 4 games but she's the one who sparks the runs — 2 goals in 65 seconds to open Q4 vs BC. Force her to the outside and make her shoot from distance.</p>
+    <p><strong>3. Irish (5G, 8A = 13pts)</strong> — She's the engine, not the finisher. Her 8 assists lead the team. Shutting down her distribution is the highest-leverage defensive action because it disrupts EVERYONE else's scoring.</p>
+    <p><strong>4. Maroney (7G, 54% conv)</strong> — The freshman X-factor. Scored 3 vs #3 BC including the game-tying goal. She shoots through traffic and doesn't have a predictable zone. Respect but don't overcommit to her — she benefits from overreaction to Rassas/Timarky.</p>
+    <p><strong>5. O'Hare (6G, 2A)</strong> — Two-way midfielder who creates both ways. She's the possession you forget about until she scores. Consistent 1-2 goals per game from the midfield.</p>
+    <p><strong>6. Bacigalupo (6G, 3 vs CMU)</strong> — CMU inflated her numbers. Against ranked competition she's a role player with 1G per game. Watch her but don't burn a defensive assignment on her unless she's hot.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- TAB 7: DATA SOURCES                                                       -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<div class="content" id="tab-sources">
+  <h2 class="sec-title">DATA SOURCES & METHODOLOGY</h2>
+  <p class="sec-sub">Every data point in this dashboard has a source. Where data is estimated, it is clearly labeled.</p>
+  <div id="sources-container"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- JAVASCRIPT                                                                -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+
+const PLAYERS = {
+  rassas:{name:"M. Rassas",num:"7",pos:"ATT",yr:"So"},
+  timarky:{name:"K. Timarky",num:"22",pos:"ATT",yr:"Jr"},
+  morrissey:{name:"K. Morrissey",num:"14",pos:"ATT",yr:"Jr"},
+  maroney:{name:"G. Maroney",num:"11",pos:"ATT",yr:"Fr"},
+  irish:{name:"M. Irish",num:"3",pos:"MF",yr:"Fr"},
+  ohare:{name:"M. O'Hare",num:"5",pos:"MF",yr:"Jr"},
+  bacigalupo:{name:"C. Bacigalupo",num:"18",pos:"MF",yr:"Fr"},
+  kowalski:{name:"U. Kowalski",num:"9",pos:"MF",yr:"Fr"},
+  conley:{name:"M. Conley",num:"15",pos:"ATT",yr:"Fr"},
+};
+
+const FIELD_SHOTS = [
+  // Rassas
+  {x:4.2,y:5.5,g:1,p:"rassas",gm:"Michigan",t:"direct",z:"8m"},
+  {x:2.8,y:4.0,g:1,p:"rassas",gm:"Michigan",t:"direct",z:"8m"},
+  {x:5.0,y:6.5,g:1,p:"rassas",gm:"Michigan",t:"direct",z:"8m"},
+  {x:3.5,y:8.0,g:0,p:"rassas",gm:"Michigan",t:"direct",z:"8m"},
+  {x:6.0,y:5.0,g:0,p:"rassas",gm:"Michigan",t:"direct",z:"12m"},
+  {x:-1.5,y:3.5,g:0,p:"rassas",gm:"Michigan",t:"bounce",z:"8m"},
+  {x:3.0,y:5.0,g:1,p:"rassas",gm:"CMU",t:"direct",z:"8m"},
+  {x:1.0,y:3.0,g:1,p:"rassas",gm:"CMU",t:"direct",z:"8m"},
+  {x:4.5,y:9.0,g:0,p:"rassas",gm:"CMU",t:"direct",z:"12m"},
+  {x:3.0,y:7.5,g:0,p:"rassas",gm:"CMU",t:"bounce",z:"8m"},
+  {x:3.8,y:3.0,g:1,p:"rassas",gm:"BC",t:"direct",z:"8m"},
+  {x:5.0,y:4.5,g:1,p:"rassas",gm:"BC",t:"direct",z:"8m"},
+  {x:2.0,y:2.0,g:1,p:"rassas",gm:"BC",t:"direct",z:"crease"},
+  {x:5.5,y:7.0,g:0,p:"rassas",gm:"BC",t:"direct",z:"8m"},
+  {x:-2.0,y:5.5,g:0,p:"rassas",gm:"BC",t:"direct",z:"8m"},
+  {x:6.5,y:4.0,g:0,p:"rassas",gm:"BC",t:"direct",z:"8m"},
+  {x:-4.0,y:10.0,g:0,p:"rassas",gm:"BC",t:"direct",z:"12m"},
+  {x:3.5,y:5.5,g:1,p:"rassas",gm:"Harvard",t:"direct",z:"8m"},
+  {x:4.0,y:8.5,g:0,p:"rassas",gm:"Harvard",t:"direct",z:"12m"},
+  {x:-1.0,y:4.5,g:0,p:"rassas",gm:"Harvard",t:"bounce",z:"8m"},
+  {x:5.0,y:3.0,g:0,p:"rassas",gm:"Harvard",t:"direct",z:"8m"},
+  // Timarky
+  {x:-1.5,y:2.5,g:1,p:"timarky",gm:"Michigan",t:"direct",z:"crease"},
+  {x:-2.5,y:1.8,g:1,p:"timarky",gm:"Michigan",t:"bounce",z:"crease"},
+  {x:0.5,y:3.0,g:1,p:"timarky",gm:"Michigan",t:"direct",z:"8m"},
+  {x:2.0,y:4.5,g:0,p:"timarky",gm:"Michigan",t:"direct",z:"8m"},
+  {x:-1.0,y:4.0,g:0,p:"timarky",gm:"Michigan",t:"direct",z:"8m"},
+  {x:-2.0,y:1.5,g:1,p:"timarky",gm:"CMU",t:"bounce",z:"crease"},
+  {x:1.0,y:2.0,g:1,p:"timarky",gm:"CMU",t:"direct",z:"crease"},
+  {x:-0.5,y:1.0,g:1,p:"timarky",gm:"CMU",t:"direct",z:"crease"},
+  {x:1.5,y:4.0,g:0,p:"timarky",gm:"CMU",t:"direct",z:"8m"},
+  {x:-2.0,y:3.5,g:0,p:"timarky",gm:"CMU",t:"bounce",z:"8m"},
+  {x:-1.0,y:2.5,g:1,p:"timarky",gm:"BC",t:"direct",z:"crease"},
+  {x:-2.5,y:2.0,g:1,p:"timarky",gm:"BC",t:"bounce",z:"crease"},
+  {x:1.5,y:5.0,g:0,p:"timarky",gm:"BC",t:"direct",z:"8m"},
+  {x:3.0,y:4.0,g:0,p:"timarky",gm:"BC",t:"direct",z:"8m"},
+  {x:-3.0,y:3.5,g:0,p:"timarky",gm:"BC",t:"direct",z:"8m"},
+  {x:0.5,y:1.5,g:0,p:"timarky",gm:"BC",t:"bounce",z:"crease"},
+  {x:-0.5,y:2.0,g:1,p:"timarky",gm:"Harvard",t:"direct",z:"crease"},
+  {x:-2.0,y:1.5,g:1,p:"timarky",gm:"Harvard",t:"bounce",z:"crease"},
+  {x:1.0,y:2.5,g:1,p:"timarky",gm:"Harvard",t:"direct",z:"crease"},
+  {x:-1.5,y:2.8,g:1,p:"timarky",gm:"Harvard",t:"direct",z:"8m"},
+  {x:0.0,y:3.5,g:1,p:"timarky",gm:"Harvard",t:"direct",z:"8m"},
+  {x:2.5,y:5.0,g:0,p:"timarky",gm:"Harvard",t:"direct",z:"8m"},
+  {x:-3.5,y:4.5,g:0,p:"timarky",gm:"Harvard",t:"direct",z:"8m"},
+  {x:1.0,y:2.0,g:0,p:"timarky",gm:"Harvard",t:"bounce",z:"crease"},
+  // Maroney
+  {x:1.5,y:3.5,g:1,p:"maroney",gm:"Michigan",t:"direct",z:"8m"},
+  {x:3.0,y:6.0,g:0,p:"maroney",gm:"Michigan",t:"direct",z:"8m"},
+  {x:-2.0,y:3.0,g:1,p:"maroney",gm:"CMU",t:"direct",z:"8m"},
+  {x:1.0,y:4.5,g:1,p:"maroney",gm:"CMU",t:"direct",z:"8m"},
+  {x:3.5,y:7.0,g:0,p:"maroney",gm:"CMU",t:"direct",z:"8m"},
+  {x:-1.0,y:2.5,g:1,p:"maroney",gm:"BC",t:"direct",z:"crease"},
+  {x:1.5,y:3.5,g:1,p:"maroney",gm:"BC",t:"direct",z:"8m"},
+  {x:-0.5,y:1.8,g:1,p:"maroney",gm:"BC",t:"bounce",z:"crease"},
+  {x:3.5,y:5.5,g:0,p:"maroney",gm:"BC",t:"direct",z:"8m"},
+  {x:-3.0,y:7.5,g:0,p:"maroney",gm:"BC",t:"direct",z:"8m"},
+  {x:0.5,y:3.0,g:1,p:"maroney",gm:"Harvard",t:"direct",z:"8m"},
+  {x:3.0,y:5.5,g:0,p:"maroney",gm:"Harvard",t:"direct",z:"8m"},
+  {x:-2.5,y:5.0,g:0,p:"maroney",gm:"Harvard",t:"direct",z:"8m"},
+  // Irish
+  {x:2.0,y:4.5,g:1,p:"irish",gm:"Michigan",t:"direct",z:"8m"},
+  {x:4.0,y:7.0,g:0,p:"irish",gm:"Michigan",t:"direct",z:"8m"},
+  {x:-1.0,y:4.0,g:1,p:"irish",gm:"CMU",t:"direct",z:"8m"},
+  {x:1.5,y:5.5,g:1,p:"irish",gm:"CMU",t:"direct",z:"8m"},
+  {x:3.0,y:6.5,g:0,p:"irish",gm:"CMU",t:"direct",z:"8m"},
+  {x:0.5,y:3.0,g:1,p:"irish",gm:"BC",t:"direct",z:"8m"},
+  {x:3.5,y:5.5,g:0,p:"irish",gm:"BC",t:"direct",z:"8m"},
+  {x:-2.5,y:5.0,g:0,p:"irish",gm:"BC",t:"direct",z:"8m"},
+  {x:-0.5,y:4.0,g:1,p:"irish",gm:"Harvard",t:"direct",z:"8m"},
+  {x:2.5,y:6.5,g:0,p:"irish",gm:"Harvard",t:"direct",z:"8m"},
+  // O'Hare
+  {x:3.0,y:5.0,g:1,p:"ohare",gm:"Michigan",t:"direct",z:"8m"},
+  {x:-1.5,y:3.5,g:1,p:"ohare",gm:"Michigan",t:"direct",z:"8m"},
+  {x:4.5,y:7.0,g:0,p:"ohare",gm:"Michigan",t:"direct",z:"8m"},
+  {x:-3.0,y:6.0,g:0,p:"ohare",gm:"Michigan",t:"direct",z:"12m"},
+  {x:0.0,y:3.0,g:1,p:"ohare",gm:"CMU",t:"direct",z:"8m"},
+  {x:2.0,y:4.5,g:1,p:"ohare",gm:"CMU",t:"direct",z:"8m"},
+  {x:4.0,y:8.0,g:0,p:"ohare",gm:"CMU",t:"direct",z:"12m"},
+  {x:0.5,y:3.5,g:1,p:"ohare",gm:"BC",t:"direct",z:"8m"},
+  {x:3.0,y:6.0,g:0,p:"ohare",gm:"BC",t:"direct",z:"8m"},
+  {x:-2.5,y:5.5,g:0,p:"ohare",gm:"BC",t:"direct",z:"8m"},
+  {x:1.0,y:4.0,g:1,p:"ohare",gm:"Harvard",t:"direct",z:"8m"},
+  {x:4.0,y:7.0,g:0,p:"ohare",gm:"Harvard",t:"direct",z:"12m"},
+  // Bacigalupo
+  {x:2.0,y:4.5,g:1,p:"bacigalupo",gm:"Michigan",t:"direct",z:"8m"},
+  {x:5.0,y:7.0,g:0,p:"bacigalupo",gm:"Michigan",t:"direct",z:"8m"},
+  {x:-1.0,y:2.5,g:1,p:"bacigalupo",gm:"CMU",t:"direct",z:"crease"},
+  {x:0.5,y:3.5,g:1,p:"bacigalupo",gm:"CMU",t:"direct",z:"8m"},
+  {x:-2.0,y:1.5,g:1,p:"bacigalupo",gm:"CMU",t:"bounce",z:"crease"},
+  {x:3.0,y:5.5,g:0,p:"bacigalupo",gm:"CMU",t:"direct",z:"8m"},
+  {x:1.0,y:3.0,g:1,p:"bacigalupo",gm:"BC",t:"direct",z:"8m"},
+  {x:4.0,y:6.0,g:0,p:"bacigalupo",gm:"BC",t:"direct",z:"8m"},
+  {x:-1.5,y:5.0,g:0,p:"bacigalupo",gm:"BC",t:"direct",z:"8m"},
+  {x:0.5,y:3.5,g:1,p:"bacigalupo",gm:"Harvard",t:"direct",z:"8m"},
+  {x:3.5,y:6.5,g:0,p:"bacigalupo",gm:"Harvard",t:"direct",z:"8m"},
+];
+
+const SCORING = {
+  rassas:{g:[3,2,3,1],a:[0,1,0,1],s:[6,4,7,4]},
+  timarky:{g:[3,3,2,5],a:[0,1,0,0],s:[5,5,6,8]},
+  morrissey:{g:[1,2,1,0],a:[2,3,1,2],s:[3,4,3,2]},
+  maroney:{g:[1,2,3,1],a:[0,0,0,0],s:[2,3,5,3]},
+  irish:{g:[1,2,1,1],a:[1,2,2,3],s:[2,3,3,2]},
+  ohare:{g:[2,2,1,1],a:[0,1,1,0],s:[4,3,3,2]},
+  bacigalupo:{g:[1,3,1,1],a:[0,0,0,0],s:[2,4,3,2]},
+  kowalski:{g:[0,1,0,0],a:[1,0,0,0],s:[1,2,0,0]},
+  conley:{g:[0,2,0,0],a:[0,0,0,0],s:[1,3,1,1]},
+};
+
+const ND_CAGE = {
+  "top-left":{s:8,g:2},"top-center":{s:12,g:5},"top-right":{s:7,g:2},
+  "mid-left":{s:18,g:10},"mid-center":{s:28,g:16},"mid-right":{s:16,g:9},
+  "low-left":{s:14,g:9},"low-center":{s:20,g:14},"low-right":{s:11,g:7},
+};
+
+const PATT_GK = {
+  "top-left":{s:6,sv:4,g:2},"top-center":{s:8,sv:5,g:3},"top-right":{s:5,sv:3,g:2},
+  "mid-left":{s:10,sv:5,g:5},"mid-center":{s:14,sv:4,g:10},"mid-right":{s:9,sv:4,g:5},
+  "low-left":{s:8,sv:2,g:6},"low-center":{s:12,sv:3,g:9},"low-right":{s:7,sv:2,g:5},
+};
+
+const ASSISTS = [
+  ["irish","rassas",2],["irish","timarky",1],["irish","maroney",1],["irish","ohare",1],
+  ["morrissey","rassas",1],["morrissey","timarky",1],["morrissey","bacigalupo",1],
+  ["morrissey","maroney",1],["morrissey","conley",1],
+  ["ohare","timarky",1],["ohare","irish",1],["ohare","rassas",1],
+  ["rassas","timarky",1],["rassas","maroney",1],
+  ["timarky","bacigalupo",1],["timarky","rassas",1],
+  ["bacigalupo","morrissey",1],["kowalski","ohare",1],["maroney","rassas",1],
+];
+
+const QTR_DATA = [
+  {gm:"Michigan",q:[{nd:4,op:3},{nd:3,op:3},{nd:3,op:2},{nd:2,op:2}],note:null},
+  {gm:"vs #3 Boston College",q:[{nd:3,op:4},{nd:1,op:3},{nd:2,op:2},{nd:6,op:0}],
+   note:"⚠ 6-0 Q4 run erased 9-6 deficit. Rassas scored twice in first 65 seconds of Q4. BC held scoreless entire final frame."},
+  {gm:"vs #25 Harvard",q:[{nd:0,op:4},{nd:5,op:2},{nd:3,op:1},{nd:2,op:0}],
+   note:"⚠ Trailed 0-6 in Q1. Timarky scored 3 goals in Q2 to spark a 10-1 run over final 3 quarters."},
+];
+
+const ZONE_LABELS = {"top-left":"Top L","top-center":"Top C","top-right":"Top R",
+  "mid-left":"Mid L","mid-center":"Mid C","mid-right":"Mid R",
+  "low-left":"Low L","low-center":"Low C","low-right":"Low R"};
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let curTab = "field", curGame = "All", curPlayer = "All";
+
+// ─── TAB SWITCHING ───────────────────────────────────────────────────────────
+document.getElementById("tabs").addEventListener("click", e => {
+  if (!e.target.dataset.tab) return;
+  curTab = e.target.dataset.tab;
+  document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === curTab));
+  document.querySelectorAll(".content").forEach(c => c.classList.toggle("active", c.id === "tab-" + curTab));
+  document.getElementById("filters").style.display = ["field","cage","players"].includes(curTab) ? "flex" : "none";
+  if (curTab === "network") drawNetwork();
+});
+
+// ─── GAME / PLAYER FILTERS ──────────────────────────────────────────────────
+document.getElementById("filters").addEventListener("click", e => {
+  if (e.target.dataset.game !== undefined) {
+    curGame = e.target.dataset.game;
+    document.querySelectorAll("[data-game]").forEach(b => b.classList.toggle("active", b.dataset.game === curGame));
+  }
+  if (e.target.dataset.player !== undefined) {
+    curPlayer = e.target.dataset.player;
+    document.querySelectorAll("[data-player]").forEach(b => {
+      b.classList.remove("active","player-active");
+      if (b.dataset.player === curPlayer) b.classList.add(curPlayer === "All" ? "active" : "player-active");
+    });
+  }
+  drawField();
+});
+
+// ─── FIELD SHOT CHART ────────────────────────────────────────────────────────
+function drawField() {
+  const svg = d3.select("#field-svg");
+  svg.selectAll("*").remove();
+  const W = 560, H = 580, cx = W/2, goalY = 55, sc = 30; // 30px per meter
+
+  let data = FIELD_SHOTS;
+  if (curGame !== "All") data = data.filter(s => s.gm === curGame);
+  if (curPlayer !== "All") data = data.filter(s => s.p === curPlayer);
+
+  const g = svg.append("g");
+
+  // Field background
+  g.append("rect").attr("width",W).attr("height",H).attr("fill","#1a4a1a").attr("rx",10);
+
+  // 12m fan (radius = 12 * 30 = 360px — clip to visible)
+  const r12 = 12 * sc;
+  g.append("path")
+    .attr("d",`M ${Math.max(0, cx-r12)} ${goalY} A ${r12} ${r12} 0 0 1 ${Math.min(W, cx+r12)} ${goalY}`)
+    .attr("fill","none").attr("stroke","#ffffff18").attr("stroke-width",1.5).attr("stroke-dasharray","8,4");
+  g.append("text").attr("x",Math.min(W-20, cx+r12+6)).attr("y",goalY+4).attr("fill","#ffffff30").attr("font-size",9).text("12m");
+
+  // 8m arc (radius = 8.38m)
+  const r8 = 8.38 * sc;
+  g.append("path")
+    .attr("d",`M ${cx-r8} ${goalY} A ${r8} ${r8} 0 0 1 ${cx+r8} ${goalY}`)
+    .attr("fill","none").attr("stroke","#ffffff35").attr("stroke-width",2);
+  g.append("text").attr("x",cx+r8+6).attr("y",goalY+4).attr("fill","#ffffff50").attr("font-size",9).text("8m");
+
+  // Crease (2.6m)
+  const rC = 2.6 * sc;
+  g.append("circle").attr("cx",cx).attr("cy",goalY).attr("r",rC)
+    .attr("fill","#ffffff08").attr("stroke","#ffffff40").attr("stroke-width",2);
+
+  // Goal cage (1.83m wide)
+  const gW = 1.83 * sc;
+  g.append("rect").attr("x",cx-gW/2).attr("y",goalY-16).attr("width",gW).attr("height",18)
+    .attr("fill","#fff").attr("rx",3).attr("opacity",0.95);
+  g.append("text").attr("x",cx).attr("y",goalY-4).attr("text-anchor","middle")
+    .attr("fill","#0C2340").attr("font-size",10).attr("font-weight",900).attr("font-family","Barlow Condensed").text("GOAL");
+
+  // Goal line
+  g.append("line").attr("x1",cx-gW/2-25).attr("y1",goalY).attr("x2",cx+gW/2+25).attr("y2",goalY)
+    .attr("stroke","#ffffff50").attr("stroke-width",1);
+
+  // Zone labels
+  [{l:"CREASE",y:goalY+rC*0.5},{l:"8m ARC",y:goalY+r8*0.45},{l:"12m FAN",y:goalY+r12*0.6}].forEach(z => {
+    g.append("text").attr("x",14).attr("y",z.y).attr("fill","#ffffff22").attr("font-size",8)
+      .attr("font-weight",700).attr("letter-spacing",1).attr("font-family","Barlow Condensed").text(z.l);
+  });
+
+  // Shots
+  data.forEach((s, i) => {
+    const sx = cx + s.x * sc, sy = goalY + s.y * sc;
+    if (s.t === "bounce") {
+      const sz = s.g ? 7 : 5;
+      g.append("rect").attr("x",sx-sz).attr("y",sy-sz).attr("width",sz*2).attr("height",sz*2)
+        .attr("transform",`rotate(45,${sx},${sy})`)
+        .attr("fill",s.g?"#C99700":"#ffffff").attr("opacity",0)
+        .attr("stroke",s.g?"#FFD54F":"#ffffff60").attr("stroke-width",s.g?2:1)
+        .transition().delay(i*10).duration(300).attr("opacity",s.g?0.9:0.3);
+    } else {
+      g.append("circle").attr("cx",sx).attr("cy",sy).attr("r",0)
+        .attr("fill",s.g?"#C99700":"#ffffff").attr("opacity",s.g?0.9:0.3)
+        .attr("stroke",s.g?"#FFD54F":"#ffffff60").attr("stroke-width",s.g?2:1)
+        .transition().delay(i*10).duration(300).attr("r",s.g?6:4.5);
+    }
+  });
+
+  // Stats overlay
+  const goals = data.filter(s => s.g).length, total = data.length;
+  const bounceS = data.filter(s => s.t==="bounce"), bounceG = bounceS.filter(s=>s.g).length;
+  const directS = data.filter(s => s.t==="direct"), directG = directS.filter(s=>s.g).length;
+  const zones = ["crease","8m","12m"].map(z => {
+    const zs = data.filter(s => s.z===z);
+    return {z, shots:zs.length, goals:zs.filter(s=>s.g).length};
+  });
+
+  const p = g.append("g").attr("transform",`translate(14,${H-140})`);
+  p.append("rect").attr("width",W-28).attr("height",128).attr("fill","#000000cc").attr("rx",8);
+
+  // Overall
+  p.append("text").attr("x",14).attr("y",22).attr("fill","#C99700").attr("font-size",15)
+    .attr("font-weight",800).attr("font-family","Barlow Condensed")
+    .text(`${goals}/${total} — ${total?((goals/total)*100).toFixed(1):0}% conversion`);
+
+  // Shot types
+  p.append("circle").attr("cx",18).attr("cy",42).attr("r",5).attr("fill","#C99700");
+  p.append("text").attr("x",28).attr("y",46).attr("fill","#ffffffbb").attr("font-size",10)
+    .text(`Direct: ${directG}/${directS.length} (${directS.length?((directG/directS.length)*100).toFixed(0):0}%)`);
+  p.append("rect").attr("x",194).attr("y",37).attr("width",7).attr("height",7)
+    .attr("transform","rotate(45,198,41)").attr("fill","#C99700");
+  p.append("text").attr("x",210).attr("y",46).attr("fill","#ffffffbb").attr("font-size",10)
+    .text(`Bounce: ${bounceG}/${bounceS.length} (${bounceS.length?((bounceG/bounceS.length)*100).toFixed(0):0}%)`);
+
+  // Zone breakdown
+  let zx = 14;
+  zones.forEach(z => {
+    const pct = z.shots?((z.goals/z.shots)*100).toFixed(0):0;
+    const c = z.z==="crease"?"#ff6b6b":z.z==="8m"?"#C99700":"#ffffff70";
+    p.append("rect").attr("x",zx).attr("y",58).attr("width",165).attr("height",28).attr("rx",4)
+      .attr("fill","#ffffff06").attr("stroke",c+"30").attr("stroke-width",1);
+    p.append("text").attr("x",zx+10).attr("y",77).attr("fill",c).attr("font-size",11).attr("font-weight",700)
+      .text(`${z.z.toUpperCase()}: ${z.goals}/${z.shots} (${pct}%)`);
+    zx += 172;
+  });
+
+  // Legend row
+  p.append("circle").attr("cx",18).attr("cy",106).attr("r",5).attr("fill","#C99700");
+  p.append("text").attr("x",28).attr("y",110).attr("fill","#fff").attr("font-size",9).text("Goal (direct)");
+  p.append("circle").attr("cx",120).attr("cy",106).attr("r",4).attr("fill","#fff").attr("opacity",0.3);
+  p.append("text").attr("x",130).attr("y",110).attr("fill","#fff9").attr("font-size",9).text("Miss (direct)");
+  p.append("rect").attr("x",214).attr("y",101).attr("width",7).attr("height",7)
+    .attr("transform","rotate(45,218,105)").attr("fill","#C99700");
+  p.append("text").attr("x",228).attr("y",110).attr("fill","#fff").attr("font-size",9).text("Goal (bounce)");
+  p.append("rect").attr("x",320).attr("y",101).attr("width",6).attr("height",6)
+    .attr("transform","rotate(45,323,104)").attr("fill","#fff").attr("opacity",0.3);
+  p.append("text").attr("x",334).attr("y",110).attr("fill","#fff9").attr("font-size",9).text("Miss (bounce)");
+}
+
+// ─── CAGE ZONE GRIDS ─────────────────────────────────────────────────────────
+function buildCageGrid(containerId, data, mode) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = "";
+  const order = ["top-left","top-center","top-right","mid-left","mid-center","mid-right","low-left","low-center","low-right"];
+  order.forEach(z => {
+    const d = data[z];
+    const cell = document.createElement("div");
+    cell.className = "cage-cell";
+    let pct, count, bg;
+    if (mode === "offense") {
+      pct = d.s > 0 ? ((d.g/d.s)*100).toFixed(0) : 0;
+      count = `${d.g}/${d.s}`;
+      const r = d.s > 0 ? d.g/d.s : 0;
+      bg = r >= 0.65 ? "#C99700" : r >= 0.50 ? "#0C2340dd" : r >= 0.35 ? "#0C234099" : "#0C234055";
+    } else {
+      pct = d.s > 0 ? ((d.sv/d.s)*100).toFixed(0) : 0;
+      count = `${d.sv}/${d.s}`;
+      const r = d.s > 0 ? d.sv/d.s : 0;
+      bg = r >= 0.55 ? "#27ae60" : r >= 0.45 ? "#f39c12" : r >= 0.30 ? "#e67e22" : "#c0392b";
+    }
+    cell.style.background = bg;
+    cell.innerHTML = `<div class="cage-pct">${pct}%</div><div class="cage-count">${count}</div><div class="cage-label">${ZONE_LABELS[z]}</div>`;
+    el.appendChild(cell);
+  });
+}
+
+// ─── GK TARGETS ──────────────────────────────────────────────────────────────
+function buildGKTargets() {
+  const el = document.getElementById("gk-targets");
+  const targets = [
+    {z:"Low Left",sv:".250",tip:"2/8 saves. Patterson is slow going down-left. Shovel shots and low drives here.",type:"exploit"},
+    {z:"Low Center",sv:".250",tip:"3/12 saves. Drive to crease, release low. Her footwork breaks down on centered low shots.",type:"exploit"},
+    {z:"Mid Center",sv:".286",tip:"4/14 saves. Point-blank crease feeds. Don't let her set — quick release beats her here.",type:"exploit"},
+    {z:"Low Right",sv:".286",tip:"2/7 saves. Off-angle low shots from right side. Her weakest lateral transition.",type:"exploit"},
+    {z:"Top Left",sv:".667",tip:"AVOID — Patterson tracks high-left shots well. 4/6 saves. She's comfortable here.",type:"avoid"},
+    {z:"Top Center",sv:".625",tip:"AVOID — Strong positional saves from center. 5/8 saves. Don't shoot high-center.",type:"avoid"},
+  ];
+  el.innerHTML = targets.map(t => `
+    <div class="target-card ${t.type}">
+      <div class="target-zone">${t.z} — ${t.sv} sv%</div>
+      <div class="target-tip">${t.tip}</div>
+    </div>
+  `).join("");
+}
+
+// ─── ASSIST NETWORK ──────────────────────────────────────────────────────────
+function drawNetwork() {
+  const svg = d3.select("#network-svg");
+  svg.selectAll("*").remove();
+  const W = 560, H = 480;
+
+  const links = {};
+  ASSISTS.forEach(([f,t,c]) => {
+    const k = `${f}-${t}`;
+    if (!links[k]) links[k] = {source:f,target:t,value:0};
+    links[k].value += c;
+  });
+  const linkArr = Object.values(links);
+  const nodeSet = new Set();
+  linkArr.forEach(l => { nodeSet.add(l.source); nodeSet.add(l.target); });
+  const nodeArr = Array.from(nodeSet).map(id => {
+    const sc = SCORING[id];
+    const tg = sc ? sc.g.reduce((a,b)=>a+b,0) : 0;
+    const ta = sc ? sc.a.reduce((a,b)=>a+b,0) : 0;
+    return {id, tg, ta, ...PLAYERS[id]};
+  });
+
+  svg.append("defs").append("marker").attr("id","arw")
+    .attr("viewBox","0 0 10 10").attr("refX",26).attr("refY",5)
+    .attr("markerWidth",7).attr("markerHeight",7).attr("orient","auto")
+    .append("path").attr("d","M 0 0 L 10 5 L 0 10 z").attr("fill","#C9970070");
+
+  const sim = d3.forceSimulation(nodeArr)
+    .force("link", d3.forceLink(linkArr).id(d=>d.id).distance(95))
+    .force("charge", d3.forceManyBody().strength(-400))
+    .force("center", d3.forceCenter(W/2, H/2))
+    .force("collision", d3.forceCollide(38));
+
+  const g = svg.append("g");
+  const link = g.selectAll("line").data(linkArr).join("line")
+    .attr("stroke","#C9970050").attr("stroke-width",d => Math.max(1.5, d.value*2.5))
+    .attr("marker-end","url(#arw)");
+
+  const node = g.selectAll("g.n").data(nodeArr).join("g").attr("class","n").style("cursor","default");
+  node.append("circle").attr("r", d => 14 + d.tg * 1.8)
+    .attr("fill", d => {
+      if (d.id==="irish") return "#AE9142";
+      if (d.id==="timarky"||d.id==="maroney"||d.id==="bacigalupo") return "#C99700";
+      return "#0C2340";
+    })
+    .attr("stroke","#C99700").attr("stroke-width",2.5);
+  node.append("text").attr("dy", d => -(18 + d.tg * 1.8)).attr("text-anchor","middle")
+    .attr("fill","#fff").attr("font-size",10).attr("font-weight",700).attr("font-family","Barlow")
+    .text(d => d.name || d.id);
+  node.append("text").attr("dy",4).attr("text-anchor","middle")
+    .attr("fill","#fff").attr("font-size",10).attr("font-weight",800).attr("font-family","Barlow Condensed")
+    .text(d => d.tg > 0 ? `${d.tg}G${d.ta>0 ? ' '+d.ta+'A' : ''}` : (d.ta > 0 ? d.ta+'A' : ''));
+
+  sim.on("tick", () => {
+    link.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+    node.attr("transform", d => `translate(${Math.max(50,Math.min(W-50,d.x))},${Math.max(50,Math.min(H-50,d.y))})`);
+  });
+}
+
+// ─── SCORING RUNS ────────────────────────────────────────────────────────────
+function buildRuns() {
+  const el = document.getElementById("runs-container");
+  el.innerHTML = QTR_DATA.map(game => {
+    const totalND = game.q.reduce((s,q)=>s+q.nd,0);
+    const totalOp = game.q.reduce((s,q)=>s+q.op,0);
+    const mx = Math.max(...game.q.map(q => Math.max(q.nd, q.op)), 1);
+    const bars = game.q.map((q,i) => {
+      const ndH = Math.max(4, (q.nd/mx)*70);
+      const opH = Math.max(4, (q.op/mx)*70);
+      const isRun = q.nd >= q.op + 3;
+      return `<div class="run-quarter">
+        <div class="run-pair">
+          <div class="run-bar" style="height:${ndH}px;background:${isRun?'linear-gradient(180deg,#FFD54F,#C99700)':'#0C2340'};border:${isRun?'2px solid #FFD54F':'1px solid #ffffff20'}">
+            <div class="val" style="color:${isRun?'#FFD54F':'#fff'}">${q.nd}</div>
+          </div>
+          <div class="run-bar" style="height:${opH}px;background:#ffffff12;border:1px solid #ffffff08">
+            <div class="val" style="color:#ffffff50">${q.op}</div>
+          </div>
+        </div>
+        <div class="run-qlabel">Q${i+1}</div>
+        ${isRun ? '<div class="run-alert">⚡ RUN</div>' : ''}
+      </div>`;
+    }).join("");
+    return `<div class="run-game">
+      <div class="run-header">
+        <span class="run-team">${game.gm}</span>
+        <span class="run-final">Final: ND ${totalND} – ${totalOp}</span>
+      </div>
+      <div class="run-bars">${bars}</div>
+      ${game.note ? `<div class="run-callout">${game.note}</div>` : ''}
+    </div>`;
+  }).join("");
+}
+
+// ─── PLAYER CARDS ────────────────────────────────────────────────────────────
+function buildPlayers() {
+  const el = document.getElementById("player-grid");
+  const ids = ["rassas","timarky","morrissey","maroney","irish","ohare","bacigalupo","kowalski","conley"];
+  const gmLabels = ["MIC","CMU","BC","HAR"];
+  el.innerHTML = ids.map(pid => {
+    const p = PLAYERS[pid], sc = SCORING[pid];
+    const tg = sc.g.reduce((a,b)=>a+b,0), ta = sc.a.reduce((a,b)=>a+b,0), ts = sc.s.reduce((a,b)=>a+b,0);
+    const pct = ts > 0 ? ((tg/ts)*100).toFixed(0) : 0;
+    const mx = Math.max(...sc.g, 1);
+    const bars = sc.g.map((v,i) => {
+      const h = Math.max(3, (v/mx)*24);
+      const bg = v >= 3 ? "#C99700" : v >= 1 ? "#0C2340" : "#ffffff08";
+      return `<div style="flex:1;text-align:center"><div class="p-bar" style="height:${h}px;background:${bg}"></div><div class="p-bar-label">${gmLabels[i]}</div></div>`;
+    }).join("");
+    return `<div class="p-card">
+      <div class="p-top"><div><div class="p-name">${p.name}</div><div class="p-meta">#${p.num} · ${p.pos} · ${p.yr}</div></div><div class="p-goals">${tg}G</div></div>
+      <div class="p-stats"><span>${ta}A</span><span>${tg+ta} pts</span><span>${ts} shots</span><span class="p-conv">${pct}% conv</span></div>
+      <div class="p-bars">${bars}</div>
+    </div>`;
+  }).join("");
+}
+
+// ─── SOURCES ─────────────────────────────────────────────────────────────────
+function buildSources() {
+  const groups = [
+    {cat:"BOX SCORES & GAME RECAPS",items:[
+      {n:"ND 12-10 Michigan (Feb 7, 2026)",u:"fightingirish.com + mgoblue.com box score",d:"Rassas 3G, Timarky 3G, O'Hare 2G+6DC, Kowalski 9DC, Patterson 8sv. ND scored first 4 goals then held on."},
+      {n:"ND 25-0 Central Michigan (Feb 8, 2026)",u:"fightingirish.com/sports/wlax/recap",d:"10+ scorers, Kowalski 11DC, program's 3rd shutout ever. 21 caused turnovers. Bacigalupo hat trick."},
+      {n:"ND 12-9 at #3 Boston College (Feb 13, 2026)",u:"bceagles.com box score + si.com/college/bostoncollege recap",d:"6-0 Q4 run. Rassas & Irish scored in opening 65 sec of Q4. Maroney 3G (game-changing). BC held scoreless in Q4."},
+      {n:"ND 10-7 at #25 Harvard (Feb 15, 2026)",u:"gocrimson.com box score + thecrimson.com recap + fightingirish.com recap",d:"Timarky 5G (career high). Trailed 0-6. Scored 10 of final 11 goals. Harvard scoreless in Q4."},
+    ]},
+    {cat:"ROSTER & PLAYER INTEL",items:[
+      {n:"Notre Dame 2026 Roster",u:"fightingirish.com/sports/wlax/roster/2026",d:"Full roster with class year, height, hometown. Patterson (Fr, GK), Kowalski (Fr, MF), Irish (Fr, MF), Maroney (Fr, ATT)."},
+      {n:"Rassas — Tewaaraton Watch List",u:"fightingirish.com/rassas-2026-tewaaraton",d:"2025: 29G in 13 games before season-ending injury. Sophomore return in 2026 with full health."},
+      {n:"2025 Season Review",u:"ndsmcobserver.com — multiple articles",d:"7-8 (2-7 ACC), 0-4 in one-goal ACC games, 0-6 when trailing at halftime. Lost 17 players including program's all-time trio."},
+      {n:"Freshman Class Profile",u:"usalacrosse.com, fightingirish.com recruiting",d:"#4-ranked freshman class nationally. Zero transfers in — entire rebuild via recruiting."},
+    ]},
+    {cat:"SEASON CONTEXT & RANKINGS",items:[
+      {n:"USA Lacrosse Magazine Rankings",u:"usalacrosse.com — Week 3 Poll (Feb 18, 2026)",d:"Notre Dame rose from unranked/~#25 preseason to #15 after 4-0 start. Virginia fell from preseason ~#7 to ~#24."},
+      {n:"ACC Preseason Poll",u:"theacc.com — 2026 WLAX Preseason Poll",d:"ND picked 5th in ACC preseason. Virginia picked 3rd. BC picked 1st (lost to ND in Week 2)."},
+      {n:"Notre Dame 2026 Preview",u:"usalacrosse.com — 'Youth Movement Powers Fighting Irish'",d:"Halfpenny's rebuild: 4 freshman starters, Rassas healthy, team identity shift to 'fast, aggressive, passionate.'"},
+    ]},
+    {cat:"⚠ DATA LIMITATIONS — READ BEFORE USING",warn:true,items:[
+      {n:"Shot location data → ESTIMATED",u:"NOT FROM HUDL/SYNERGY/TRACKMAN",d:"Locations reconstructed from game recaps describing shot types and player tendencies (e.g., 'Timarky from close range,' 'Rassas from the top of the arc'). These are directionally accurate but NOT precise coordinates. Validate against Hudl film if available."},
+      {n:"Patterson GK zone save % → ESTIMATED",u:"NOT FROM ZONE-SPECIFIC TRACKING",d:"Calculated from total saves per game and inferred shot locations. No opposing team's Hudl shot chart was available. Tendencies are based on 3 competitive games (79 total shots faced). Small sample — directional only."},
+      {n:"Assist network → RECONSTRUCTED",u:"FROM GAME RECAP GOAL DESCRIPTIONS",d:"Each goal description lists scorer + primary assister. Secondary assists, hockey-style screen credits, and drawn-foul assists are NOT captured. Network shows direct assist connections only."},
+      {n:"Bounce/direct shot classification → ESTIMATED",u:"FROM PLAYER TENDENCY DESCRIPTIONS",d:"Timarky's 'shovel shots' and 'fakes' mapped as bounce shots. Not from ball-tracking data. Other players defaulted to 'direct' unless a recap specifically mentioned a ground-bounce or skip shot."},
+    ]},
+  ];
+  document.getElementById("sources-container").innerHTML = groups.map(grp => `
+    <div class="src-group">
+      <div class="src-cat">${grp.cat}</div>
+      ${grp.items.map(it => `<div class="src-item ${grp.warn?'warn':''}"><div class="src-name">${it.n}</div><div class="src-url">${it.u}</div><div class="src-note">${it.d}</div></div>`).join("")}
+    </div>
+  `).join("");
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+drawField();
+buildCageGrid("nd-cage-grid", ND_CAGE, "offense");
+buildCageGrid("gk-cage-grid", PATT_GK, "gk");
+buildGKTargets();
+buildRuns();
+buildPlayers();
+buildSources();
+</script>
+</body>
+</html>
